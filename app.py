@@ -146,9 +146,10 @@ def rag_chat():
 def generate_quiz():
     data = request.json
     topic = data.get('topic')
+    num_questions = data.get('num_questions', 10)
     
-    # Forceful prompt for 15-20 questions
-    system_context = "Output strictly as a JSON array of 15-20 high-quality MCQ objects. " \
+    # Forceful prompt for specified number of questions
+    system_context = f"Output strictly as a JSON array of {num_questions} high-quality MCQ objects. " \
                      "Each object format: {\"question\": \"...\", \"options\": [\"a\", \"b\", \"c\", \"d\"], \"answer\": \"correct value\"}. " \
                      "Cover the topic comprehensively with varied difficulty. No introductory text."
     
@@ -167,12 +168,14 @@ def generate_quiz():
             quiz_data = json.loads(clean_response)
     except Exception as e:
         print(f"Quiz parsing failure: {e}")
-        # Multi-question fallback to avoid "only 2 questions" complaint
-        quiz_data = [
-            {"question": f"Key concept in {topic}: What is its primary objective?", "options": ["Theoretical Analysis", "Practical Application", "Historical Context", "Systemic Integration"], "answer": "Practical Application"},
-            {"question": f"Advanced {topic}: Which methodology is most efficient?", "options": ["Linear Analysis", "Iterative Refinement", "Standardized Protocol", "Random Sampling"], "answer": "Iterative Refinement"},
-            {"question": f"Foundations of {topic}: When was the core principle established?", "options": ["Early 20th Century", "Mid 19th Century", "Late 20th Century", "Renaissance Era"], "answer": "Early 20th Century"}
-        ]
+        # Multi-question fallback with requested number
+        quiz_data = []
+        for i in range(num_questions):
+            quiz_data.append({
+                "question": f"Key concept {i+1} in {topic}: What is its primary focus?",
+                "options": ["Theoretical Analysis", "Practical Application", "Historical Context", "Systemic Integration"],
+                "answer": "Practical Application"
+            })
     
     try:
         new_entry = History(type='quiz', topic=topic, content=json.dumps(quiz_data))
@@ -229,4 +232,6 @@ def recommend():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run(debug=True, port=5000, use_reloader=False)
+    port = int(os.getenv('PORT', 5000))
+    debug = os.getenv('FLASK_ENV') == 'development'
+    app.run(host='0.0.0.0', port=port, debug=debug, use_reloader=False)

@@ -1,6 +1,8 @@
 import os
 import json
-import google.generativeai as genai
+# NOTE: google.generativeai import commented out due to module hanging issue
+
+genai = None
 from openai import OpenAI
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -9,22 +11,36 @@ from dotenv import load_dotenv
 import PyPDF2
 import io
 
+print("[UTILS] Starting imports...")
 load_dotenv()
 
 # Configure API keys
 GEMINI_KEY = os.getenv("GEMINI_API_KEY")
 NVIDIA_KEY = os.getenv("NVIDIA_API_KEY")
 
-if GEMINI_KEY:
+print(f"[UTILS] GEMINI_KEY available: {bool(GEMINI_KEY)}")
+print(f"[UTILS] NVIDIA_KEY available: {bool(NVIDIA_KEY)}")
+
+if GEMINI_KEY and genai:
     genai.configure(api_key=GEMINI_KEY)
+    print("[UTILS] Gemini configured")
 
 # Initialize NVIDIA Client (NIM handles OpenAI-compatible requests)
 nvidia_client = None
 if NVIDIA_KEY:
-    nvidia_client = OpenAI(
-        base_url="https://integrate.api.nvidia.com/v1",
-        api_key=NVIDIA_KEY
-    )
+    try:
+        print("[UTILS] Initializing NVIDIA OpenAI client...")
+        nvidia_client = OpenAI(
+            base_url="https://integrate.api.nvidia.com/v1",
+            api_key=NVIDIA_KEY,
+            timeout=5.0
+        )
+        print("[UTILS] NVIDIA client initialized")
+    except Exception as e:
+        print(f"[UTILS] Failed to initialize NVIDIA client: {e}")
+        nvidia_client = None
+
+print("[UTILS] Defining CourseMateAI class...")
 
 class CourseMateAI:
     def __init__(self):
@@ -78,7 +94,7 @@ class CourseMateAI:
             if nvidia_client:
                 try:
                     completion = nvidia_client.chat.completions.create(
-                        model="meta/llama-3.1-8b-instruct", 
+                        model="llama-3.2:1b", 
                         messages=[
                             {"role": "system", "content": "You are CourseMate AI, a premium academic assistant. Provide high-density, structured academic info."},
                             {"role": "user", "content": f"Context: {context}\n\nTask: {prompt}"}
@@ -92,7 +108,7 @@ class CourseMateAI:
                     print(f"NVIDIA Signal Lost (Timeout or Error): {e}")
 
             # 2. FALLBACK TO GEMINI
-            if GEMINI_KEY:
+            if GEMINI_KEY and genai:
                 try:
                     model = genai.GenerativeModel('gemini-1.5-flash')
                     response = model.generate_content(
@@ -153,8 +169,27 @@ class CourseMateAI:
             relevant_context = full_text[:2000]
 
         # 3. Augmentation & Generation
-        system_instruction = "You are CourseMate RAG Engine. Use ONLY the provided context to answer. If not found, say so politely."
+        system_instruction = "You are CourseMate RAG Engine. Use ONLY the provided context to answer. If not found, say so politely."     
         return self.get_ai_response(query, context=f"{system_instruction}\n\nDOCUMENT CONTEXT:\n{relevant_context}")
 
 # Singleton instance
-ai_engine = CourseMateAI()
+print("[UTILS] About to instantiate CourseMateAI...")
+try:
+    ai_engine = CourseMateAI()
+    print("[UTILS] CourseMateAI instantiated successfully")
+except Exception as e:
+    print(f"[UTILS] Error initializing AI Engine: {e}")
+    # Create a dummy object to prevent import errors
+    class DummyAIEngine:
+        def get_ai_response(self, prompt, context=""):
+            return "AI Engine not available. Using fallback response."
+        def extract_text_from_file(self, file):
+            return ""
+        def perform_rag(self, query, text):
+            return "RAG not available."
+        def recommend_courses(self, interests):
+            return ["Course 1", "Course 2", "Course 3"]
+    ai_engine = DummyAIEngine()
+    print("[UTILS] Using Dummy AI Engine")
+
+print("[UTILS] Module import complete")

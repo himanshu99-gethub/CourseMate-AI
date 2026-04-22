@@ -8,26 +8,26 @@
 
 <div class="auth-glass-card">
     <div class="form-field">
-        <label for="topic" class="display-font" style="font-size: 1.2rem; margin-bottom: 1rem; display: block; color: var(--accent);">What's the subject or document?</label>
+        <label for="topic" class="display-font form-label-accent">What's the subject or document?</label>
         
-        <div class="dual-input-container" style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <div class="dual-input-container">
             <div class="input-group">
-                <input type="text" id="topic" class="form-input-v2" placeholder="e.g. Quantum Physics, History of Art" style="margin-bottom: 0;">
-                <p class="field-hint" style="font-size: 0.8rem; color: #94a3b8; margin-top: 0.5rem;">Enter a topic for AI-driven research...</p>
+                <input type="text" id="topic" class="form-input-v2 form-input-no-mb" placeholder="e.g. Quantum Physics, History of Art">
+                <p class="field-hint">Enter a topic for AI-driven research...</p>
             </div>
 
-            <div class="options-row" style="display: flex; gap: 1rem; margin-top: -0.5rem;">
-                <div class="input-group" style="flex: 1;">
-                    <label style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem; display: block;">Academic Level</label>
-                    <select id="level" class="form-input-v2" style="padding: 0.6rem;">
+            <div class="options-row">
+                <div class="input-group flex-grow">
+                    <label class="input-sub-label" for="level">Academic Level</label>
+                    <select id="level" class="form-input-v2 select-compact" title="Select academic level">
                         <option value="Beginner">Beginner</option>
                         <option value="Intermediate" selected>Intermediate</option>
                         <option value="Advanced">Advanced / Expert</option>
                     </select>
                 </div>
-                <div class="input-group" style="flex: 1;">
-                    <label style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem; display: block;">Generation Mode</label>
-                    <select id="mode" class="form-input-v2" style="padding: 0.6rem;">
+                <div class="input-group flex-grow">
+                    <label class="input-sub-label" for="mode">Generation Mode</label>
+                    <select id="mode" class="form-input-v2 select-compact" title="Select generation mode">
                         <option value="Standard">Standard</option>
                         <option value="Deep Dive" selected>Deep Dive</option>
                         <option value="Quick Revision">Quick Revision</option>
@@ -35,20 +35,20 @@
                 </div>
             </div>
 
-            <div class="divider-text" style="text-align: center; color: var(--accent); opacity: 0.5; font-size: 0.9rem;">— OR UPLOAD SOURCE —</div>
+            <div class="divider-text">— OR UPLOAD SOURCE —</div>
 
             <div class="input-group">
                 <div class="file-upload-zone" id="drop-zone">
-                    <input type="file" id="note-file" accept=".pdf,.txt" style="display: none;">
+                    <input type="file" id="note-file" accept=".pdf,.txt" class="hidden">
                     <label for="note-file" class="file-label">
-                        <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; margin-bottom: 0.5rem; display: block;"></i>
-                        <span>Click to upload PDF/TXT or drag & drop</span>
-                        <p id="file-name" class="hidden" style="margin-top: 0.5rem; color: var(--accent); font-weight: bold;"></p>
+                        <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                        <span>Click to upload PDF/TXT or drag &amp; drop</span>
+                        <p id="file-name" class="hidden file-name-display"></p>
                     </label>
                 </div>
             </div>
 
-            <button class="primary-btn p-btn-wide" id="gen-btn" style="margin-top: 1rem;">Process & Generate Notes</button>
+            <button class="primary-btn p-btn-wide mt-1" id="gen-btn">Process &amp; Generate Notes</button>
         </div>
     </div>
     
@@ -60,7 +60,7 @@
     <div id="notes-result" class="result-container hidden">
         <div class="result-header">
             <h2 id="result-title">Manuscript Output</h2>
-            <button class="badge clickable-badge" onclick="window.print()">
+            <button class="badge clickable-badge" onclick="window.print()" title="Export to PDF" aria-label="Export to PDF">
                 <i class="fas fa-print"></i> Export to PDF
             </button>
         </div>
@@ -68,13 +68,13 @@
         
         <!-- RAG Chat Integration -->
         <div class="rag-chat-section mt-4">
-            <div class="divider-text">QUANTUM NOTES Q&A</div>
+            <div class="divider-text">QUANTUM NOTES Q&amp;A</div>
             <div id="rag-messages" class="rag-chat-history">
                 <div class="ai-msg">I've parsed the document. You can now ask specific questions based on this content.</div>
             </div>
             <div class="rag-input-container">
                 <input type="text" id="rag-input" placeholder="Ask anything about these notes..." class="form-input-v2">
-                <button id="rag-send" class="primary-btn auto-width"><i class="fas fa-paper-plane"></i></button>
+                <button id="rag-send" class="primary-btn auto-width" title="Send question" aria-label="Send question"><i class="fas fa-paper-plane"></i></button>
             </div>
         </div>
     </div>

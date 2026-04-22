@@ -147,6 +147,7 @@ h1, h2, h3, .logo-text, .display-font {
     justify-content: space-between;
     padding: 0 4rem;
     background: rgba(2, 6, 23, 0.85);
+    -webkit-backdrop-filter: blur(16px);
     backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--border-dim);
     position: sticky;
@@ -509,6 +510,13 @@ h1, h2, h3, .logo-text, .display-font {
     display: flex;
     gap: 1.5rem;
     align-items: center;
+    position: relative;
+}
+
+.chat-spinner-pos {
+    position: absolute;
+    left: -40px;
+    top: 12px;
 }
 
 .styled-input {
@@ -934,4 +942,128 @@ h1, h2, h3, .logo-text, .display-font {
 
 .divider-text::before { left: 0; }
 .divider-text::after { right: 0; }
+
+/* ============================================================
+   Utility classes replacing former inline styles
+   ============================================================ */
+
+/* base.html — navbar icon */
+.navbar-status-icon {
+    margin-right: 8px;
+    font-size: 10px;
+}
+
+/* notes.html — label style */
+.form-label-accent {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    display: block;
+    color: var(--accent);
+}
+
+/* notes.html — dual input container */
+.dual-input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* notes.html — input with no bottom margin */
+.form-input-no-mb {
+    margin-bottom: 0;
+}
+
+/* notes.html — field hint */
+.field-hint {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-top: 0.5rem;
+}
+
+/* notes.html / recommendations.html — options row */
+.options-row {
+    display: flex;
+    gap: 1rem;
+    margin-top: -0.5rem;
+}
+
+/* notes.html — sub-label inside inputs */
+.input-sub-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 0.3rem;
+    display: block;
+}
+
+/* notes.html — select compact padding */
+.select-compact {
+    padding: 0.6rem;
+}
+
+/* notes.html — file upload icon */
+.upload-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+/* notes.html — file name display */
+.file-name-display {
+    margin-top: 0.5rem;
+    color: var(--accent);
+    font-weight: bold;
+}
+
+/* notes.html / quiz.html / recommendations.html — top margin on button */
+.mt-1 { margin-top: 1rem; }
+.mt-2 { margin-top: 2rem; }
+.mt-4 { margin-top: 4rem !important; }
+
+/* quiz.html — flex row container */
+.flex-row {
+    display: flex;
+    gap: 1rem;
+    align-items: stretch;
+}
+
+/* quiz.html — flex grow for text input */
+.flex-grow {
+    flex: 1;
+}
+
+/* quiz.html — fixed-width select */
+.select-fixed {
+    flex: 0 0 auto;
+    width: 140px;
+    margin-bottom: 0;
+}
+
+/* quiz.html — auto-width primary button */
+.auto-width {
+    width: auto;
+    white-space: nowrap;
+}
+
+/* recommendations.html — two-column grid form */
+.career-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+/* recommendations.html — form sub-label */
+.form-sub-label {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+/* recommendations.html — scrollable output */
+.output-scrollable {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
 

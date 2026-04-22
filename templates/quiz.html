@@ -8,10 +8,16 @@
 
 <div class="auth-glass-card container-narrow">
     <div class="form-field" id="quiz-init">
-        <label for="quiz-topic" class="display-font" style="font-size: 1.2rem; margin-bottom: 1rem; display: block; color: var(--accent);">Enter Topic for Quiz</label>
-        <div class="flex-row" style="display: flex; gap: 1rem; align-items: stretch;">
-            <input type="text" id="quiz-topic" class="form-input-v2" placeholder="e.g. Psychology, Macroeconomics, AI Algorithms" style="margin-bottom: 0; flex: 1;">
-            <button class="primary-btn auto-width p-btn-wide" id="quiz-btn" style="width: auto; white-space: nowrap;">Start Quiz</button>
+        <label for="quiz-topic" class="display-font form-label-accent">Enter Topic for Quiz</label>
+        <div class="flex-row">
+            <input type="text" id="quiz-topic" class="form-input-v2 flex-grow form-input-no-mb" placeholder="e.g. Psychology, Macroeconomics, AI Algorithms">
+            <select id="quiz-questions" class="form-input-v2 select-fixed" title="Select number of questions">
+                <option value="5">5 Questions</option>
+                <option value="10" selected>10 Questions</option>
+                <option value="15">15 Questions</option>
+                <option value="20">20 Questions</option>
+            </select>
+            <button class="primary-btn auto-width p-btn-wide" id="quiz-btn">START QUIZ</button>
         </div>
     </div>
     
@@ -34,6 +40,7 @@
 {% block scripts %}
 <script>
     const topicInput = document.getElementById('quiz-topic');
+    const questionsSelect = document.getElementById('quiz-questions');
     const quizBtn = document.getElementById('quiz-btn');
     const quizDisplay = document.getElementById('quiz-display');
     const loader = document.getElementById('quiz-loader');
@@ -43,6 +50,7 @@
 
     quizBtn.addEventListener('click', async () => {
         const topic = topicInput.value.trim();
+        const numQuestions = parseInt(questionsSelect.value);
         if (!topic) return;
 
         quizInit.classList.add('hidden');
@@ -52,7 +60,7 @@
             const response = await fetch('/api/generate-quiz', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ topic })
+                body: JSON.stringify({ topic, num_questions: numQuestions })
             });
             const data = await response.json();
             renderQuiz(topic, data.quiz);

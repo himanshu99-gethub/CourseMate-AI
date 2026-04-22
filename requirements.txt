@@ -7,3 +7,5 @@ python-dotenv
 scikit-learn
 pandas
 numpy
+gunicorn
+PyPDF2
