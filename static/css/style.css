@@ -1066,4 +1066,23 @@ h1, h2, h3, .logo-text, .display-font {
     overflow-y: auto;
 }
 
+/* --- Recommendations Page --- */
+.career-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.rec-form-label {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.output-paper-scrollable {
+    max-height: 60vh;
+    overflow-y: auto;
+}
 

@@ -8,26 +8,26 @@
 
 <div class="auth-glass-card container-narrow">
     <div class="form-field" id="rec-init">
-        <div class="career-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1rem;">
+        <div class="career-form-grid">
             <div class="input-group">
-                <label style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem; display: block;">Interests & Passion</label>
+                <label class="rec-form-label">Interests &amp; Passion</label>
                 <input type="text" id="interest-input" class="form-input-v2" placeholder="e.g. AI, Space, Finance">
             </div>
             <div class="input-group">
-                <label style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem; display: block;">Current Skill Level</label>
-                <select id="level-input" class="form-input-v2">
+                <label class="rec-form-label">Current Skill Level</label>
+                <select id="level-input" class="form-input-v2" title="Current Skill Level">
                     <option value="Beginner">Beginner / Student</option>
                     <option value="Intermediate">Intermediate / Junior Prof</option>
                     <option value="Advanced">Advanced / Expert</option>
                 </select>
             </div>
             <div class="input-group">
-                <label style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem; display: block;">Core Goal</label>
+                <label class="rec-form-label">Core Goal</label>
                 <input type="text" id="goal-input" class="form-input-v2" placeholder="e.g. Become a Sr. Data Scientist">
             </div>
             <div class="input-group">
-                <label style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem; display: block;">Time Availability</label>
-                <select id="time-input" class="form-input-v2">
+                <label class="rec-form-label">Time Availability</label>
+                <select id="time-input" class="form-input-v2" title="Time Availability">
                     <option value="Part-time (5-10 hrs/week)">Part-time (5-10 hrs/week)</option>
                     <option value="Moderate (15-25 hrs/week)">Moderate (15-25 hrs/week)</option>
                     <option value="Full-immersion (40+ hrs/week)">Full-immersion (40+ hrs/week)</option>
@@ -48,7 +48,7 @@
             <button class="badge clickable-badge" onclick="resetSearch()">Refine Parameters</button>
         </div>
         
-        <div id="recommendations-content" class="output-paper" style="max-height: 60vh; overflow-y: auto;">
+        <div id="recommendations-content" class="output-paper output-paper-scrollable">
             <!-- Roadmap content as Markdown -->
         </div>
     </div>
