@@ -1086,3 +1086,117 @@ h1, h2, h3, .logo-text, .display-font {
     overflow-y: auto;
 }
 
+/* --- Flow Integration & Premium Actions --- */
+.notes-flow-actions-wrapper {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-dim);
+}
+
+.notes-flow-actions-wrapper h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.notes-flow-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.flow-action-card {
+    background: var(--bg-surface-high);
+    border: 1px solid var(--border-bright);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    color: var(--text-primary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.flow-action-card:hover {
+    border-color: var(--accent);
+    background: var(--bg-surface-highest);
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.4), 0 0 15px var(--accent-subtle);
+}
+
+.flow-action-card i {
+    font-size: 2rem;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    filter: drop-shadow(0 0 8px var(--accent-glow));
+}
+
+.flow-action-card span {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 1.25rem;
+    display: block;
+    color: #fff;
+}
+
+.flow-action-card p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+    line-height: 1.4;
+}
+
+/* Chat Integration Context Toggle */
+.context-mode-wrapper {
+    background: var(--bg-surface-high);
+    border: 1px solid var(--border-bright);
+    border-radius: var(--radius-lg);
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.context-toggle-container {
+    display: flex;
+    background: var(--bg-base);
+    border-radius: 8px;
+    padding: 0.25rem;
+    border: 1px solid var(--border-dim);
+}
+
+.context-tab {
+    padding: 0.4rem 1rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+}
+
+.context-tab.active {
+    background: var(--accent);
+    color: var(--on-accent);
+    box-shadow: 0 0 8px var(--accent-glow);
+}
+
+.context-info-text {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.context-info-text strong {
+    color: var(--accent);
+}
+
+

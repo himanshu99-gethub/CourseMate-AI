@@ -48,6 +48,13 @@
     const container = document.getElementById('questions-container');
     const restartBtn = document.getElementById('restart-btn');
 
+    // Parse URL parameter and pre-fill topic
+    const urlParams = new URLSearchParams(window.location.search);
+    const topicParam = urlParams.get('topic');
+    if (topicParam) {
+        topicInput.value = topicParam;
+    }
+
     quizBtn.addEventListener('click', async () => {
         const topic = topicInput.value.trim();
         const numQuestions = parseInt(questionsSelect.value);

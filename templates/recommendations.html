@@ -62,6 +62,18 @@
     const loader = document.getElementById('rec-loader');
     const initSection = document.getElementById('rec-init');
     const resultsSection = document.getElementById('results-section');
+
+    // Parse URL parameters and pre-fill interests and goal
+    const urlParams = new URLSearchParams(window.location.search);
+    const interestParam = urlParams.get('interest');
+    const goalParam = urlParams.get('goal');
+    if (interestParam) {
+        interestInput.value = interestParam;
+    }
+    if (goalParam) {
+        document.getElementById('goal-input').value = goalParam;
+    }
+
     generateBtn.addEventListener('click', async () => {
         const interests = interestInput.value.trim();
         const level = document.getElementById('level-input').value;

@@ -6,6 +6,16 @@
 <div class="chat-window-integrated">
     <div class="integrated-header">
         <h1>ACADEMIC AI ASSISTANT</h1>
+        
+        <!-- Context Mode Toggle -->
+        <div class="context-mode-wrapper hidden" id="context-wrapper">
+            <div class="context-toggle-container">
+                <button class="context-tab active" id="mode-general-btn">🤖 Tutor</button>
+                <button class="context-tab" id="mode-notes-btn">📄 Notes Context</button>
+            </div>
+            <div class="context-info-text" id="context-info">Active Context: <strong id="context-topic-name">None</strong></div>
+        </div>
+
         <div class="status-indicator">
             <span class="dot"></span> SECURE NEURAL LINK
         </div>
@@ -33,6 +43,15 @@
     const sendBtn = document.getElementById('send-btn');
     const chatMessages = document.getElementById('chat-messages');
     const spinner = document.getElementById('chat-spinner');
+    
+    // Toggle DOM elements
+    const contextWrapper = document.getElementById('context-wrapper');
+    const modeGeneralBtn = document.getElementById('mode-general-btn');
+    const modeNotesBtn = document.getElementById('mode-notes-btn');
+    const contextTopicName = document.getElementById('context-topic-name');
+    
+    let chatMode = 'general'; // 'general' or 'notes'
+    let currentTopic = '';
 
     function addMessage(text, isUser) {
         const msgDiv = document.createElement('div');
@@ -56,11 +75,15 @@
         chatInput.value = '';
         spinner.classList.remove('hidden');
 
+        const isNotes = chatMode === 'notes';
+        const url = isNotes ? '/api/rag-chat' : '/api/chat';
+        const payload = isNotes ? { query: message } : { message };
+
         try {
-            const response = await fetch('/api/chat', {
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message })
+                body: JSON.stringify(payload)
             });
             const data = await response.json();
             addMessage(data.response, false);
@@ -71,9 +94,55 @@
         }
     }
 
+    // Set active chat mode
+    function setChatMode(mode) {
+        chatMode = mode;
+        if (mode === 'notes') {
+            modeGeneralBtn.classList.remove('active');
+            modeNotesBtn.classList.add('active');
+            chatInput.placeholder = `Query notes context: "${currentTopic}"...`;
+        } else {
+            modeGeneralBtn.classList.add('active');
+            modeNotesBtn.classList.remove('active');
+            chatInput.placeholder = "Query the academic engine...";
+        }
+    }
+
+    // Check document status and configure toggle
+    async function checkDocumentStatus() {
+        try {
+            const res = await fetch('/api/document-status');
+            const data = await res.json();
+            
+            if (data.has_document) {
+                currentTopic = data.topic;
+                contextTopicName.innerText = currentTopic;
+                contextWrapper.classList.remove('hidden');
+                
+                // Parse URL parameter and set mode or auto-run
+                const urlParams = new URLSearchParams(window.location.search);
+                const modeParam = urlParams.get('mode');
+                
+                if (modeParam === 'notes') {
+                    setChatMode('notes');
+                    addMessage(`**Notes Context Loaded:** Connected to the study materials for **"${currentTopic}"**. Ask me anything about this document!`, false);
+                }
+            }
+        } catch (e) {
+            console.error("Failed to fetch document status:", e);
+        }
+    }
+
+    // Toggle event listeners
+    modeGeneralBtn.addEventListener('click', () => setChatMode('general'));
+    modeNotesBtn.addEventListener('click', () => setChatMode('notes'));
+
     sendBtn.addEventListener('click', handleSend);
     chatInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleSend();
     });
+
+    // Initialize document check on load
+    checkDocumentStatus();
 </script>
 {% endblock %}

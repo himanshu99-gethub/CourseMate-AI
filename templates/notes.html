@@ -66,6 +66,28 @@
         </div>
         <div id="notes-content" class="output-paper"></div>
         
+        <!-- Flow Integration Actions -->
+        <div class="notes-flow-actions-wrapper">
+            <h2>Accelerate Your Learning</h2>
+            <div class="notes-flow-actions">
+                <a href="#" class="flow-action-card" id="flow-quiz-card">
+                    <i class="fas fa-vial"></i>
+                    <span>Practice Quiz</span>
+                    <p>Test your retention of these notes with an AI quiz.</p>
+                </a>
+                <a href="#" class="flow-action-card" id="flow-chat-card">
+                    <i class="fas fa-robot"></i>
+                    <span>Discuss with AI Tutor</span>
+                    <p>Open this context in the main tutor room for full dialogue.</p>
+                </a>
+                <a href="#" class="flow-action-card" id="flow-rec-card">
+                    <i class="fas fa-route"></i>
+                    <span>Pathfinder Roadmap</span>
+                    <p>Create a career pathway and find courses based on this topic.</p>
+                </a>
+            </div>
+        </div>
+        
         <!-- RAG Chat Integration -->
         <div class="rag-chat-section mt-4">
             <div class="divider-text">QUANTUM NOTES Q&amp;A</div>
@@ -127,6 +149,13 @@
             
             resultTitle.innerText = topic || (file ? `Analysis: ${file.name}` : "Manuscript Output");
             contentDiv.innerHTML = marked.parse(data.notes);
+            
+            // Set dynamic flow integration links
+            const activeTopic = topic || (file ? file.name.replace(/\.[^/.]+$/, "") : "academic study");
+            document.getElementById('flow-quiz-card').href = `/quiz?topic=${encodeURIComponent(activeTopic)}`;
+            document.getElementById('flow-chat-card').href = `/chat?mode=notes`;
+            document.getElementById('flow-rec-card').href = `/recommendations?interest=${encodeURIComponent(activeTopic)}&goal=${encodeURIComponent('Master ' + activeTopic)}`;
+            
             resultDiv.classList.remove('hidden');
         } catch (error) {
             alert("Synthesis link failure. Please re-initiate.");

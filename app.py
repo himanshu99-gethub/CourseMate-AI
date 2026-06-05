@@ -13,7 +13,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # Simple in-memory cache for RAG
-document_store = {"current_text": ""}
+document_store = {"current_text": "", "topic": ""}
 
 # --- Models ---
 class History(db.Model):
@@ -123,6 +123,7 @@ def generate_notes():
         
         # Cache for RAG operations
         document_store["current_text"] = extracted_text if extracted_text else notes_content
+        document_store["topic"] = display_topic
         
     except Exception as e:
         print(f"Notes generation error: {e}")
@@ -130,6 +131,13 @@ def generate_notes():
         notes_content = f"# Sync Error\n\nUnable to reach the neural manuscript engine for '{display_topic}'. Please check your subject matter and try again."
     
     return jsonify({'notes': notes_content})
+
+@app.route('/api/document-status', methods=['GET'])
+def document_status():
+    return jsonify({
+        'has_document': bool(document_store["current_text"]),
+        'topic': document_store.get("topic", "")
+    })
 
 @app.route('/api/rag-chat', methods=['POST'])
 def rag_chat():
