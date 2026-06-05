@@ -21,9 +21,20 @@ NVIDIA_KEY = os.getenv("NVIDIA_API_KEY")
 print(f"[UTILS] GEMINI_KEY available: {bool(GEMINI_KEY)}")
 print(f"[UTILS] NVIDIA_KEY available: {bool(NVIDIA_KEY)}")
 
-if GEMINI_KEY and genai:
-    genai.configure(api_key=GEMINI_KEY)
-    print("[UTILS] Gemini configured")
+# Initialize Gemini Client (via OpenAI-compatible endpoint)
+gemini_client = None
+if GEMINI_KEY:
+    try:
+        print("[UTILS] Initializing Gemini OpenAI client...")
+        gemini_client = OpenAI(
+            base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+            api_key=GEMINI_KEY,
+            timeout=10.0
+        )
+        print("[UTILS] Gemini client initialized")
+    except Exception as e:
+        print(f"[UTILS] Failed to initialize Gemini client: {e}")
+        gemini_client = None
 
 # Initialize NVIDIA Client (NIM handles OpenAI-compatible requests)
 nvidia_client = None
@@ -33,7 +44,7 @@ if NVIDIA_KEY:
         nvidia_client = OpenAI(
             base_url="https://integrate.api.nvidia.com/v1",
             api_key=NVIDIA_KEY,
-            timeout=5.0
+            timeout=10.0
         )
         print("[UTILS] NVIDIA client initialized")
     except Exception as e:
@@ -94,7 +105,7 @@ class CourseMateAI:
             if nvidia_client:
                 try:
                     completion = nvidia_client.chat.completions.create(
-                        model="llama-3.2:1b", 
+                        model="meta/llama-3.1-8b-instruct", 
                         messages=[
                             {"role": "system", "content": "You are CourseMate AI, a premium academic assistant. Provide high-density, structured academic info."},
                             {"role": "user", "content": f"Context: {context}\n\nTask: {prompt}"}
@@ -107,15 +118,20 @@ class CourseMateAI:
                 except Exception as e:
                     print(f"NVIDIA Signal Lost (Timeout or Error): {e}")
 
-            # 2. FALLBACK TO GEMINI
-            if GEMINI_KEY and genai:
+            # 2. FALLBACK TO GEMINI (via OpenAI-compatible endpoint)
+            if gemini_client:
                 try:
-                    model = genai.GenerativeModel('gemini-1.5-flash')
-                    response = model.generate_content(
-                        f"{context}\n\nUser: {prompt}",
-                        generation_config=genai.types.GenerationConfig(max_output_tokens=3000)
+                    completion = gemini_client.chat.completions.create(
+                        model="gemini-1.5-flash",
+                        messages=[
+                            {"role": "system", "content": context if context else "You are CourseMate AI, a premium academic assistant. Provide high-density, structured academic info."},
+                            {"role": "user", "content": prompt}
+                        ],
+                        temperature=0.6,
+                        max_tokens=3000,
+                        timeout=30.0
                     )
-                    return response.text
+                    return completion.choices[0].message.content
                 except Exception as e:
                     print(f"Gemini Signal Lost: {e}")
             
