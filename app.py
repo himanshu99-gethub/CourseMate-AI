@@ -23,6 +23,10 @@ class History(db.Model):
     content = db.Column(db.Text, nullable=False) # JSON format for structured data
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
+# Ensure database tables are created (especially when running under Gunicorn on Render)
+with app.app_context():
+    db.create_all()
+
 # --- Routes ---
 
 @app.route('/')
@@ -238,8 +242,6 @@ def recommend():
     return jsonify({'roadmap': roadmap})
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
     port = int(os.getenv('PORT', 5000))
     debug = os.getenv('FLASK_ENV') == 'development'
     app.run(host='0.0.0.0', port=port, debug=debug, use_reloader=False)
