@@ -9,7 +9,8 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
-    <aside class="sidebar">
+    <div class="sidebar-backdrop hidden" id="sidebar-backdrop"></div>
+    <aside class="sidebar" id="sidebar">
         <a href="{{ url_for('dashboard') }}" class="logo">
             <i class="fas fa-brain"></i>
             <span class="logo-text">CourseMate AI</span>
@@ -56,6 +57,9 @@
 
     <main class="main-content">
         <nav class="navbar">
+            <button class="mobile-toggle-btn" id="mobile-sidebar-toggle" aria-label="Toggle Navigation">
+                <i class="fas fa-bars"></i>
+            </button>
             <div class="welcome-text">
                 <i class="fas fa-circle-dot" style="margin-right: 8px; font-size: 10px;"></i>
                 NEURAL CORE ONLINE
