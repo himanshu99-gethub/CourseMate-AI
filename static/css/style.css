@@ -90,6 +90,19 @@ h1, h2, h3, .logo-text, .display-font {
     color: #fff;
 }
 
+.sidebar-heading {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    padding-left: 0.75rem;
+    border-bottom: 1px solid var(--border-dim);
+    padding-bottom: 0.5rem;
+}
+
 .nav-menu {
     list-style: none;
     flex-grow: 1;
