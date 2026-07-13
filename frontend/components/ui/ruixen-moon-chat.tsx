@@ -96,8 +96,81 @@ function parseRoadmapSteps(markdownText: string) {
   return steps;
 }
 
+const getWelcomeMessage = (mode: string) => {
+  if (mode === "notes") {
+    return "✍️ **Notes Generator Workspace**: Synthesize academic summaries. Upload PDFs/TXTs or enter a topic to generate structured study materials.";
+  }
+  if (mode === "tutor") {
+    return "🤖 **AI Tutor Room**: Explain complex subjects, formulas, or concepts. Ask me any academic question!";
+  }
+  if (mode === "quiz") {
+    return "⚡ **Quiz Lab**: Test your knowledge. Enter a topic below to generate an interactive evaluation quiz.";
+  }
+  if (mode === "pathfinder") {
+    return "🧭 **Pathfinder Advisor**: Share your career aspirations, interests, and skill level to map out an advanced career roadmap.";
+  }
+  return "How can I assist you today? Synthesize study guides, take interactive quizzes, or map out your career paths inline.";
+};
+
 export default function RuixenMoonChat() {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [activeMode, setActiveMode] = useState<"general" | "notes" | "tutor" | "quiz" | "pathfinder">("general");
+  
+  const [conversations, setConversations] = useState<Record<string, Message[]>>({
+    general: [
+      {
+        id: "w-general",
+        type: "text",
+        text: getWelcomeMessage("general"),
+        isUser: false,
+      }
+    ],
+    notes: [
+      {
+        id: "w-notes",
+        type: "text",
+        text: getWelcomeMessage("notes"),
+        isUser: false,
+      }
+    ],
+    tutor: [
+      {
+        id: "w-tutor",
+        type: "text",
+        text: getWelcomeMessage("tutor"),
+        isUser: false,
+      }
+    ],
+    quiz: [
+      {
+        id: "w-quiz",
+        type: "text",
+        text: getWelcomeMessage("quiz"),
+        isUser: false,
+      }
+    ],
+    pathfinder: [
+      {
+        id: "w-pathfinder",
+        type: "text",
+        text: getWelcomeMessage("pathfinder"),
+        isUser: false,
+      }
+    ],
+  });
+
+  const messages = conversations[activeMode] || [];
+
+  const setMessages = useCallback((updater: any) => {
+    setConversations((prev) => {
+      const oldMsgs = prev[activeMode] || [];
+      const newMsgs = typeof updater === "function" ? updater(oldMsgs) : updater;
+      return {
+        ...prev,
+        [activeMode]: newMsgs
+      };
+    });
+  }, [activeMode]);
+
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -168,14 +241,15 @@ export default function RuixenMoonChat() {
     adjustHeight(true);
 
     const userMsgId = Date.now().toString();
-    setMessages((prev) => [
+    setMessages((prev: Message[]) => [
       ...prev,
       { id: userMsgId, type: "text", text: userPrompt || `Uploaded: ${attachedFile?.name}`, isUser: true },
     ]);
     setIsLoading(true);
 
     try {
-      if (currentFlow === "notes-generation") {
+      // If we are explicitly in a notes upload flow or user attached a file in Notes Mode
+      if (currentFlow === "notes-generation" || (activeMode === "notes" && attachedFile)) {
         const formData = new FormData();
         if (userPrompt) formData.append("topic", userPrompt);
         if (attachedFile) formData.append("file", attachedFile);
@@ -185,7 +259,7 @@ export default function RuixenMoonChat() {
         const res = await fetch("/api/generate-notes", { method: "POST", body: formData });
         const data = await res.json();
         
-        setMessages((prev) => [
+        setMessages((prev: Message[]) => [
           ...prev,
           {
             id: (Date.now() + 1).toString(),
@@ -201,7 +275,8 @@ export default function RuixenMoonChat() {
         await checkDocumentStatus();
         fetchHistory();
 
-      } else if (currentFlow === "quiz-generation") {
+      } else if (currentFlow === "quiz-generation" || (activeMode === "quiz" && messages.length <= 1)) {
+        // If first prompt in Quiz Mode, generate the Quiz Grid component directly
         const res = await fetch("/api/generate-quiz", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -209,7 +284,7 @@ export default function RuixenMoonChat() {
         });
         const data = await res.json();
         
-        setMessages((prev) => [
+        setMessages((prev: Message[]) => [
           ...prev,
           {
             id: (Date.now() + 1).toString(),
@@ -222,7 +297,8 @@ export default function RuixenMoonChat() {
         setCurrentFlow("general");
         fetchHistory();
 
-      } else if (currentFlow === "pathfinder-generation") {
+      } else if (currentFlow === "pathfinder-generation" || (activeMode === "pathfinder" && messages.length <= 1)) {
+        // If first prompt in Pathfinder Mode, build career steps timeline component directly
         const res = await fetch("/api/recommend", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -230,7 +306,7 @@ export default function RuixenMoonChat() {
         });
         const data = await res.json();
         
-        setMessages((prev) => [
+        setMessages((prev: Message[]) => [
           ...prev,
           {
             id: (Date.now() + 1).toString(),
@@ -243,9 +319,10 @@ export default function RuixenMoonChat() {
         fetchHistory();
 
       } else {
-        const isNotes = chatMode === "notes";
-        const url = isNotes ? "/api/rag-chat" : "/api/chat";
-        const payload = isNotes ? { query: userPrompt } : { message: userPrompt };
+        // Regular conversation scoped to the activeMode
+        const useRAG = activeMode === "notes" && hasDocument && chatMode === "notes";
+        const url = useRAG ? "/api/rag-chat" : "/api/chat";
+        const payload = useRAG ? { query: userPrompt } : { message: userPrompt, mode: activeMode };
 
         const res = await fetch(url, {
           method: "POST",
@@ -254,14 +331,14 @@ export default function RuixenMoonChat() {
         });
         const data = await res.json();
 
-        setMessages((prev) => [
+        setMessages((prev: Message[]) => [
           ...prev,
           { id: (Date.now() + 1).toString(), type: "text", text: data.response, isUser: false },
         ]);
         fetchHistory();
       }
     } catch (err) {
-      setMessages((prev) => [
+      setMessages((prev: Message[]) => [
         ...prev,
         {
           id: (Date.now() + 1).toString(),
@@ -283,56 +360,11 @@ export default function RuixenMoonChat() {
   };
 
   const triggerQuickAction = (action: "notes" | "tutor" | "quiz" | "pathfinder") => {
-    if (action === "notes") {
-      setCurrentFlow("notes-generation");
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now().toString(),
-          type: "text",
-          text: "✍️ Enter a subject or drag & drop a PDF/TXT file below to synthesize structured study notes.",
-          isUser: false,
-        },
-      ]);
-    } else if (action === "tutor") {
-      setChatMode("general");
-      setCurrentFlow("general");
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now().toString(),
-          type: "text",
-          text: "🤖 AI Assistant Tutor mode activated. Ask me any question!",
-          isUser: false,
-        },
-      ]);
-    } else if (action === "quiz") {
-      setCurrentFlow("quiz-generation");
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now().toString(),
-          type: "text",
-          text: "⚡ Quiz Lab engaged. What topic would you like to be evaluated on?",
-          isUser: false,
-        },
-      ]);
-    } else if (action === "pathfinder") {
-      setCurrentFlow("pathfinder-generation");
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now().toString(),
-          type: "text",
-          text: "🧭 Pathfinder advisor online. Type in your interests & career goals to build a roadmap.",
-          isUser: false,
-        },
-      ]);
-    }
+    setActiveMode(action);
   };
 
   const handleQuizAnswer = (messageId: string, questionIdx: number, option: string) => {
-    setMessages((prev) =>
+    setMessages((prev: Message[]) =>
       prev.map((msg) => {
         if (msg.id === messageId && msg.data) {
           const currentAnswers = { ...msg.data.answers, [questionIdx]: option };
@@ -365,7 +397,7 @@ export default function RuixenMoonChat() {
       msgType = "pathfinder";
     }
 
-    setMessages((prev) => [
+    setMessages((prev: Message[]) => [
       ...prev,
       {
         id: Date.now().toString(),
@@ -378,7 +410,17 @@ export default function RuixenMoonChat() {
   };
 
   const clearChat = () => {
-    setMessages([]);
+    setConversations((prev) => ({
+      ...prev,
+      [activeMode]: [
+        {
+          id: `welcome-${activeMode}-${Date.now()}`,
+          type: "text",
+          text: getWelcomeMessage(activeMode),
+          isUser: false,
+        }
+      ]
+    }));
     setCurrentFlow("general");
     setAttachedFile(null);
   };
@@ -387,7 +429,13 @@ export default function RuixenMoonChat() {
     try {
       await fetch("/api/history", { method: "DELETE" });
       setHistoryItems([]);
-      setMessages([]);
+      setConversations({
+        general: [{ id: "w-g", type: "text", text: getWelcomeMessage("general"), isUser: false }],
+        notes: [{ id: "w-n", type: "text", text: getWelcomeMessage("notes"), isUser: false }],
+        tutor: [{ id: "w-t", type: "text", text: getWelcomeMessage("tutor"), isUser: false }],
+        quiz: [{ id: "w-q", type: "text", text: getWelcomeMessage("quiz"), isUser: false }],
+        pathfinder: [{ id: "w-p", type: "text", text: getWelcomeMessage("pathfinder"), isUser: false }],
+      });
       setAttachedFile(null);
       setCurrentFlow("general");
       setChatMode("general");
@@ -399,7 +447,7 @@ export default function RuixenMoonChat() {
   };
 
   const deleteMessage = (id: string) => {
-    setMessages((prev) => prev.filter((msg) => msg.id !== id));
+    setMessages((prev: Message[]) => prev.filter((msg) => msg.id !== id));
   };
 
   return (
@@ -442,34 +490,82 @@ export default function RuixenMoonChat() {
           </span>
 
           <button
-            onClick={() => triggerQuickAction("notes")}
-            className="w-full flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-white/5 text-neutral-300 hover:text-white transition-all text-xs font-semibold active:scale-[0.98] cursor-pointer text-left"
+            onClick={() => {
+              setActiveMode("general");
+              setCurrentFlow("general");
+            }}
+            className={cn(
+              "w-full flex items-center gap-3 px-2.5 py-2 rounded-lg transition-all text-xs font-bold active:scale-[0.98] cursor-pointer text-left",
+              activeMode === "general"
+                ? "bg-[#FFEF4D]/10 text-white border-l-2 border-[#FFEF4D] pl-2"
+                : "hover:bg-white/5 text-neutral-300 hover:text-white"
+            )}
           >
-            <FileText className="h-4 w-4 text-[#FFEF4D] shrink-0" />
+            <Cpu className={cn("h-4 w-4 shrink-0", activeMode === "general" ? "text-[#FFEF4D]" : "text-neutral-500")} />
+            <span>Main Assistant Tutor</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveMode("notes");
+              setCurrentFlow("general");
+            }}
+            className={cn(
+              "w-full flex items-center gap-3 px-2.5 py-2 rounded-lg transition-all text-xs font-bold active:scale-[0.98] cursor-pointer text-left",
+              activeMode === "notes"
+                ? "bg-[#FFEF4D]/10 text-white border-l-2 border-[#FFEF4D] pl-2"
+                : "hover:bg-white/5 text-neutral-300 hover:text-white"
+            )}
+          >
+            <FileText className={cn("h-4 w-4 shrink-0", activeMode === "notes" ? "text-[#FFEF4D]" : "text-neutral-500")} />
             <span>Notes Generator</span>
           </button>
 
           <button
-            onClick={() => triggerQuickAction("tutor")}
-            className="w-full flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-white/5 text-neutral-300 hover:text-white transition-all text-xs font-semibold active:scale-[0.98] cursor-pointer text-left"
+            onClick={() => {
+              setActiveMode("tutor");
+              setCurrentFlow("general");
+            }}
+            className={cn(
+              "w-full flex items-center gap-3 px-2.5 py-2 rounded-lg transition-all text-xs font-bold active:scale-[0.98] cursor-pointer text-left",
+              activeMode === "tutor"
+                ? "bg-[#FFEF4D]/10 text-white border-l-2 border-[#FFEF4D] pl-2"
+                : "hover:bg-white/5 text-neutral-300 hover:text-white"
+            )}
           >
-            <Cpu className="h-4 w-4 text-[#FFEF4D] shrink-0" />
+            <Cpu className={cn("h-4 w-4 shrink-0", activeMode === "tutor" ? "text-[#FFEF4D]" : "text-neutral-500")} />
             <span>AI Tutor Room</span>
           </button>
 
           <button
-            onClick={() => triggerQuickAction("quiz")}
-            className="w-full flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-white/5 text-neutral-300 hover:text-white transition-all text-xs font-semibold active:scale-[0.98] cursor-pointer text-left"
+            onClick={() => {
+              setActiveMode("quiz");
+              setCurrentFlow("general");
+            }}
+            className={cn(
+              "w-full flex items-center gap-3 px-2.5 py-2 rounded-lg transition-all text-xs font-bold active:scale-[0.98] cursor-pointer text-left",
+              activeMode === "quiz"
+                ? "bg-[#FFEF4D]/10 text-white border-l-2 border-[#FFEF4D] pl-2"
+                : "hover:bg-white/5 text-neutral-300 hover:text-white"
+            )}
           >
-            <Brain className="h-4 w-4 text-[#FFEF4D] shrink-0" />
+            <Brain className={cn("h-4 w-4 shrink-0", activeMode === "quiz" ? "text-[#FFEF4D]" : "text-neutral-500")} />
             <span>Quiz Practice Lab</span>
           </button>
 
           <button
-            onClick={() => triggerQuickAction("pathfinder")}
-            className="w-full flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-white/5 text-neutral-300 hover:text-white transition-all text-xs font-semibold active:scale-[0.98] cursor-pointer text-left"
+            onClick={() => {
+              setActiveMode("pathfinder");
+              setCurrentFlow("general");
+            }}
+            className={cn(
+              "w-full flex items-center gap-3 px-2.5 py-2 rounded-lg transition-all text-xs font-bold active:scale-[0.98] cursor-pointer text-left",
+              activeMode === "pathfinder"
+                ? "bg-[#FFEF4D]/10 text-white border-l-2 border-[#FFEF4D] pl-2"
+                : "hover:bg-white/5 text-neutral-300 hover:text-white"
+            )}
           >
-            <Compass className="h-4 w-4 text-[#FFEF4D] shrink-0" />
+            <Compass className={cn("h-4 w-4 shrink-0", activeMode === "pathfinder" ? "text-[#FFEF4D]" : "text-neutral-500")} />
             <span>Pathfinder Advisor</span>
           </button>
         </div>
@@ -555,14 +651,25 @@ export default function RuixenMoonChat() {
                 <PanelLeft className="h-4.5 w-4.5" />
               </Button>
             )}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <Cpu className="h-5 w-5 text-[#FFEF4D] drop-shadow-[0_0_4px_rgba(255,239,77,0.45)]" />
               <span className="font-bold text-sm tracking-tight text-white">CourseMate AI</span>
+              <span className="text-[9px] bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-full text-[#FFEF4D] font-black uppercase tracking-wider">
+                {activeMode === "general"
+                  ? "Main Tutor"
+                  : activeMode === "notes"
+                  ? "Notes Workspace"
+                  : activeMode === "tutor"
+                  ? "AI Tutor Room"
+                  : activeMode === "quiz"
+                  ? "Quiz Lab"
+                  : "Pathfinder Advisor"}
+              </span>
             </div>
           </div>
 
           {/* Notes Context mode indicator */}
-          {hasDocument && (
+          {hasDocument && activeMode === "notes" && (
             <div className="flex bg-[#0b0f19] border border-white/10 rounded-xl p-1 text-[11px] font-bold">
               <button
                 onClick={() => setChatMode("general")}
@@ -588,20 +695,6 @@ export default function RuixenMoonChat() {
 
         {/* Scrollable Conversation Workspace (Scroll hidden) */}
         <div className="flex-1 w-full max-w-3xl overflow-y-auto px-4 py-8 space-y-8 z-10 no-scrollbar">
-          {messages.length === 0 && (
-            <div className="h-full flex flex-col items-center justify-center text-center px-4">
-              <div className="h-14 w-14 rounded-2xl bg-[#1e293b]/60 border border-white/10 flex items-center justify-center mb-6 shadow-md">
-                <Cpu className="h-7 w-7 text-[#FFEF4D] drop-shadow-[0_0_8px_rgba(255,239,77,0.5)] animate-pulse" />
-              </div>
-              <h1 className="text-4xl font-extrabold tracking-tight text-white">
-                How can I assist you today?
-              </h1>
-              <p className="mt-2 text-neutral-400 text-sm max-w-md mx-auto">
-                Synthesize study guides, take interactive quizzes, or map out your career paths inline.
-              </p>
-            </div>
-          )}
-
           {messages.map((msg) => (
             <div
               key={msg.id}
@@ -835,12 +928,12 @@ export default function RuixenMoonChat() {
               }}
               onKeyDown={handleKeyDown}
               placeholder={
-                currentFlow === "notes-generation"
-                  ? "Describe notes subject..."
-                  : currentFlow === "quiz-generation"
-                  ? "Describe quiz subject..."
-                  : currentFlow === "pathfinder-generation"
-                  ? "Describe career roadmap details..."
+                activeMode === "notes"
+                  ? "Describe notes subject or type a query..."
+                  : activeMode === "quiz"
+                  ? "Describe quiz subject or type a query..."
+                  : activeMode === "pathfinder"
+                  ? "Describe career goals or type a query..."
                   : "Type your query here..."
               }
               className={cn(

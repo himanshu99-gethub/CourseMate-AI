@@ -89,11 +89,21 @@ def api_history():
 def api_chat():
     data = request.json
     message = data.get('message')
+    mode = data.get('mode', 'general')
     
-    response_text = ai_engine.get_ai_response(message, context="You are a helpful education assistant.")
+    # Map modes to specialized system prompts
+    contexts = {
+        'notes': "You are CourseMate Notes AI, a premium academic synthesizer. Help the user summarize documents, define key concepts, and structure study guides in clean Markdown.",
+        'tutor': "You are CourseMate Tutor AI. You are a friendly teacher. Explain complex topics, offer step-by-step guides, define concepts, and answer Q&As.",
+        'quiz': "You are CourseMate Quiz AI. Generate interactive MCQs, grade the user's answers, and explain correct/wrong choices to test understanding.",
+        'pathfinder': "You are CourseMate Pathfinder AI. You are a professional career advisor. Help users build roadmaps, recommend courses, evaluate skills, and design career steps."
+    }
+    
+    system_instruction = contexts.get(mode, "You are a helpful education assistant.")
+    response_text = ai_engine.get_ai_response(message, context=system_instruction)
     
     try:
-        new_entry = History(type='chat', content=json.dumps({'query': message, 'response': response_text}))
+        new_entry = History(type=mode, content=json.dumps({'query': message, 'response': response_text}))
         db.session.add(new_entry)
         db.session.commit()
     except Exception as e:
