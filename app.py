@@ -1,6 +1,7 @@
 import os
 from flask import Flask, request, jsonify, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
 from datetime import datetime
 import json
 import hashlib
@@ -12,6 +13,8 @@ static_folder = os.path.join(base_dir, 'frontend/out')
 
 app = Flask(__name__, static_folder=static_folder, static_url_path='')
 app.config['SECRET_KEY'] = 'coursemate_ai_secret_key_123'
+CORS(app) # Enable CORS for all routes
+
 
 is_vercel = os.getenv('VERCEL') == '1' or os.getenv('AWS_LAMBDA_FUNCTION_NAME') is not None
 if is_vercel:

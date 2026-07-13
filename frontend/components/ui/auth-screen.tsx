@@ -25,8 +25,9 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
     if (googleClientId) return;
     
     const fetchConfig = async () => {
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
       try {
-        const res = await fetch("/api/auth/config");
+        const res = await fetch(`${API_BASE_URL}/api/auth/config`);
         const data = await res.json();
         if (data.google_client_id) {
           setGoogleClientId(data.google_client_id);
@@ -91,8 +92,9 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
   const handleGoogleCredentialResponse = async (response: any) => {
     setError("");
     setIsLoading(true);
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
     try {
-      const res = await fetch("/api/auth/google", {
+      const res = await fetch(`${API_BASE_URL}/api/auth/google`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ credential: response.credential }),
@@ -120,8 +122,9 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
   const handleDemoGoogleLogin = async () => {
     setError("");
     setIsLoading(true);
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
     try {
-      const res = await fetch("/api/auth/google", {
+      const res = await fetch(`${API_BASE_URL}/api/auth/google`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ is_demo: true }),
@@ -150,11 +153,12 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
     }
     
     setIsLoading(true);
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
     const endpoint = isLogin ? "/api/auth/login" : "/api/auth/register";
     const payload = isLogin ? { email, password } : { name, email, password };
     
     try {
-      const res = await fetch(endpoint, {
+      const res = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

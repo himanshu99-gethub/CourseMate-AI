@@ -144,13 +144,15 @@ export default function RuixenMoonChat() {
 
   // Auth fetch wrapper (injects Bearer token dynamically)
   const authFetch = useCallback(async (url: string, options: RequestInit = {}) => {
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
     const isFormData = options.body instanceof FormData;
     const headers: Record<string, string> = {
       ...(options.headers as Record<string, string>),
       ...(token ? { "Authorization": `Bearer ${token}` } : {}),
       ...(!isFormData ? { "Content-Type": "application/json" } : {}),
     };
-    return fetch(url, { ...options, headers });
+    const targetUrl = url.startsWith("http") ? url : `${API_BASE_URL}${url}`;
+    return fetch(targetUrl, { ...options, headers });
   }, [token]);
 
   const [activeMode, setActiveMode] = useState<"general" | "notes" | "tutor" | "quiz" | "pathfinder">("general");
