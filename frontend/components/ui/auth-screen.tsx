@@ -16,11 +16,14 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
   
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [googleClientId, setGoogleClientId] = useState("");
+  const [googleClientId, setGoogleClientId] = useState(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "");
+  const [googleLoadError, setGoogleLoadError] = useState(false);
   const googleBtnContainerRef = useRef<HTMLDivElement>(null);
 
-  // Fetch Auth Config (Google Client ID) on Mount
+  // Fetch Auth Config (Google Client ID) on Mount if not in ENV
   useEffect(() => {
+    if (googleClientId) return;
+    
     const fetchConfig = async () => {
       try {
         const res = await fetch("/api/auth/config");
@@ -33,7 +36,7 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
       }
     };
     fetchConfig();
-  }, []);
+  }, [googleClientId]);
 
   // Initialize and Render Real Google Sign-in Button if Client ID exists
   useEffect(() => {
@@ -41,22 +44,26 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
 
     const initializeGoogle = () => {
       if (typeof window !== "undefined" && (window as any).google) {
-        const google = (window as any).google;
-        google.accounts.id.initialize({
-          client_id: googleClientId,
-          callback: handleGoogleCredentialResponse,
-        });
-        
-        google.accounts.id.renderButton(
-          googleBtnContainerRef.current,
-          { 
-            theme: "dark", 
-            size: "large", 
-            width: 320,
-            text: "signin_with",
-            shape: "pill"
-          }
-        );
+        try {
+          const google = (window as any).google;
+          google.accounts.id.initialize({
+            client_id: googleClientId,
+            callback: handleGoogleCredentialResponse,
+          });
+          
+          google.accounts.id.renderButton(
+            googleBtnContainerRef.current,
+            { 
+              theme: "dark", 
+              size: "large", 
+              width: 320,
+              text: "signin_with",
+              shape: "pill"
+            }
+          );
+        } catch (e) {
+          setGoogleLoadError(true);
+        }
       }
     };
 
@@ -68,7 +75,16 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
       }
     }, 500);
 
-    return () => clearInterval(checkGis);
+    // Timeout after 5 seconds
+    const timeout = setTimeout(() => {
+      clearInterval(checkGis);
+      if (!(window as any).google?.accounts?.id) setGoogleLoadError(true);
+    }, 5000);
+
+    return () => {
+      clearInterval(checkGis);
+      clearTimeout(timeout);
+    };
   }, [googleClientId]);
 
   // Handle Real Google JWT Callback
@@ -279,13 +295,16 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
 
         {/* Third-Party Auth Gateways */}
         <div className="flex flex-col items-center space-y-3">
-          {/* Real Google Auth Container */}
-          {googleClientId ? (
+          {googleClientId && !googleLoadError ? (
             <div ref={googleBtnContainerRef} className="w-full flex justify-center min-h-[40px] animate-in fade-in duration-300" />
           ) : (
-            <div className="text-center py-2 text-[11px] text-neutral-500 italic bg-[#0b0f19] border border-white/5 w-full rounded-xl">
-              Setting up secure Google connection...
-            </div>
+            <button
+              onClick={handleDemoGoogleLogin}
+              className="w-full flex items-center justify-center gap-2 py-3 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-white hover:bg-white/10 transition-all cursor-pointer"
+            >
+              <Sparkles className="h-4 w-4 text-[#FFEF4D]" />
+              {googleLoadError ? "Google Auth Unavailable - Use Demo" : "Try Demo Login"}
+            </button>
           )}
         </div>
 
