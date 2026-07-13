@@ -465,7 +465,7 @@ export default function RuixenMoonChat() {
         <div className="absolute bottom-10 left-10 h-72 w-72 rounded-full bg-blue-500/5 blur-[100px] pointer-events-none" />
 
         {/* Header Panel */}
-        <header className="relative w-full max-w-5xl flex items-center justify-between p-4 z-10 border-b border-white/10 bg-[#0f172a]/40 backdrop-blur-md">
+        <header className="relative w-full px-6 md:px-10 flex items-center justify-between p-4 z-10 border-b border-white/10 bg-[#0f172a]/40 backdrop-blur-md">
           <div className="flex items-center gap-3">
             {!isSidebarOpen && (
               <Button
