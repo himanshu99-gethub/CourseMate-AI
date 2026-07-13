@@ -97,14 +97,20 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ credential: response.credential }),
       });
-      const data = await res.json();
+      // Safely parse response — server might return non-JSON on crash
+      let data: any = {};
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error(`Server error (HTTP ${res.status}). Make sure Flask backend is running.`);
+      }
       if (res.ok && data.status === "success") {
         onAuthSuccess(data.token, data.user);
       } else {
         setError(data.message || "Google Login failed.");
       }
-    } catch (e) {
-      setError("Unable to connect to security server.");
+    } catch (e: any) {
+      setError(e.message || "Cannot reach backend. Run: venv\\Scripts\\python.exe app.py");
     } finally {
       setIsLoading(false);
     }

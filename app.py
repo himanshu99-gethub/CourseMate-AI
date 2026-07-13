@@ -3,6 +3,8 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import json
+import hashlib
+import base64
 from utils import ai_engine
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -21,20 +23,68 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# Simple in-memory cache for RAG
-document_store = {"current_text": "", "topic": ""}
+# User-specific in-memory cache for RAG: {user_id: {"current_text": "...", "topic": "..."}}
+document_store = {}
 
 # --- Models ---
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(100), nullable=True) # None for Google users
+    google_id = db.Column(db.String(100), unique=True, nullable=True)
+
 class History(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True) # nullable for backwards compatibility
     type = db.Column(db.String(20), nullable=False) # 'chat', 'notes', 'quiz', 'recommendation'
     topic = db.Column(db.String(200))
     content = db.Column(db.Text, nullable=False) # JSON format for structured data
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
-# Ensure database tables are created (especially when running under Gunicorn on Render)
+# Ensure database tables are created and migrate schema
 with app.app_context():
     db.create_all()
+    # Safely alter table to add user_id for existing databases
+    try:
+        conn = db.engine.connect()
+        conn.execute(db.text("ALTER TABLE history ADD COLUMN user_id INTEGER REFERENCES user(id)"))
+        conn.commit()
+        print("Migration: Added user_id to History table")
+    except Exception as e:
+        print("Migration: History table already migrated or SQLite version doesn't support it")
+
+# --- Global Error Handlers (always return JSON, never HTML) ---
+@app.errorhandler(404)
+def not_found(e):
+    return jsonify({'status': 'error', 'message': 'Endpoint not found'}), 404
+
+@app.errorhandler(405)
+def method_not_allowed(e):
+    return jsonify({'status': 'error', 'message': 'Method not allowed'}), 405
+
+@app.errorhandler(500)
+def internal_error(e):
+    db.session.rollback()
+    return jsonify({'status': 'error', 'message': f'Internal server error: {str(e)}'}), 500
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    db.session.rollback()
+    import traceback
+    print(f"Unhandled exception: {traceback.format_exc()}")
+    return jsonify({'status': 'error', 'message': str(e)}), 500
+
+def get_current_user():
+    auth_header = request.headers.get('Authorization')
+    if auth_header and auth_header.startswith('Bearer '):
+        token = auth_header.split(' ')[1]
+        try:
+            user_id = int(token)
+            return User.query.get(user_id)
+        except:
+            return None
+    return None
 
 # --- Serve Static Next.js Frontend ---
 
@@ -45,24 +95,171 @@ def serve(path):
         return send_from_directory(app.static_folder, path)
     else:
         return send_from_directory(app.static_folder, 'index.html')
+# --- Auth Endpoints ---
+
+@app.route('/api/auth/config', methods=['GET'])
+def auth_config():
+    return jsonify({
+        'google_client_id': os.getenv('GOOGLE_CLIENT_ID', '')
+    })
+
+@app.route('/api/auth/register', methods=['POST'])
+def auth_register():
+    data = request.json
+    name = data.get('name')
+    email = data.get('email')
+    password = data.get('password')
+    
+    if not name or not email or not password:
+        return jsonify({'status': 'error', 'message': 'Missing fields'}), 400
+        
+    email = email.strip().lower()
+    existing_user = User.query.filter_by(email=email).first()
+    if existing_user:
+        return jsonify({'status': 'error', 'message': 'User with this email already exists'}), 400
+        
+    # Standard SHA-256 password hash (lightweight & dependency-free)
+    password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
+    
+    try:
+        new_user = User(name=name, email=email, password_hash=password_hash)
+        db.session.add(new_user)
+        db.session.commit()
+        
+        return jsonify({
+            'status': 'success',
+            'token': str(new_user.id),
+            'user': {
+                'id': new_user.id,
+                'name': new_user.name,
+                'email': new_user.email
+            }
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/auth/login', methods=['POST'])
+def auth_login():
+    data = request.json
+    email = data.get('email')
+    password = data.get('password')
+    
+    if not email or not password:
+        return jsonify({'status': 'error', 'message': 'Missing email or password'}), 400
+        
+    email = email.strip().lower()
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({'status': 'error', 'message': 'Invalid email or password'}), 400
+        
+    password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
+    if user.password_hash != password_hash:
+        return jsonify({'status': 'error', 'message': 'Invalid email or password'}), 400
+        
+    return jsonify({
+        'status': 'success',
+        'token': str(user.id),
+        'user': {
+            'id': user.id,
+            'name': user.name,
+            'email': user.email
+        }
+    })
+
+@app.route('/api/auth/google', methods=['POST'])
+def auth_google():
+    data = request.json
+    credential = data.get('credential')
+    is_demo = data.get('is_demo', False)
+    
+    if is_demo:
+        demo_email = "demo.student@coursemate.ai"
+        user = User.query.filter_by(email=demo_email).first()
+        if not user:
+            try:
+                user = User(name="Demo Student", email=demo_email, google_id="demo-google-id-123")
+                db.session.add(user)
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+                return jsonify({'status': 'error', 'message': str(e)}), 500
+        return jsonify({
+            'status': 'success',
+            'token': str(user.id),
+            'user': {
+                'id': user.id,
+                'name': user.name,
+                'email': user.email
+            }
+        })
+        
+    if not credential:
+        return jsonify({'status': 'error', 'message': 'Missing Google credential'}), 400
+        
+    try:
+        parts = credential.split('.')
+        if len(parts) != 3:
+            return jsonify({'status': 'error', 'message': 'Malformed credential'}), 400
+            
+        payload = parts[1]
+        payload += '=' * (-len(payload) % 4)
+        decoded_bytes = base64.urlsafe_b64decode(payload)
+        payload_data = json.loads(decoded_bytes.decode('utf-8'))
+        
+        google_id = payload_data.get('sub')
+        email = payload_data.get('email', '').strip().lower()
+        name = payload_data.get('name', 'Google User')
+        
+        if not google_id or not email:
+            return jsonify({'status': 'error', 'message': 'Failed to resolve user info from Google'}), 400
+            
+        user = User.query.filter((User.google_id == google_id) | (User.email == email)).first()
+        
+        if not user:
+            user = User(name=name, email=email, google_id=google_id)
+            db.session.add(user)
+            db.session.commit()
+        elif not user.google_id:
+            user.google_id = google_id
+            db.session.commit()
+            
+        return jsonify({
+            'status': 'success',
+            'token': str(user.id),
+            'user': {
+                'id': user.id,
+                'name': user.name,
+                'email': user.email
+            }
+        })
+        
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': f'Google authentication failed: {str(e)}'}), 400
 
 # --- API Endpoints ---
 
 @app.route('/api/history', methods=['GET', 'DELETE'])
 def api_history():
+    current_user = get_current_user()
+    if not current_user:
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+
     if request.method == 'DELETE':
         try:
-            History.query.delete()
+            # Delete only current user's history
+            History.query.filter_by(user_id=current_user.id).delete()
             db.session.commit()
-            # Reset in-memory cached documents as well
-            document_store["current_text"] = ""
-            document_store["topic"] = ""
+            # Reset user-specific document cache
+            if current_user.id in document_store:
+                del document_store[current_user.id]
             return jsonify({'status': 'success', 'message': 'All chat history cleared'})
         except Exception as e:
             db.session.rollback()
             return jsonify({'status': 'error', 'message': str(e)}), 500
 
-    history_items = History.query.order_by(History.timestamp.desc()).all()
+    # Retrieve only current user's history
+    history_items = History.query.filter_by(user_id=current_user.id).order_by(History.timestamp.desc()).all()
     history_list = []
     for item in history_items:
         history_list.append({
@@ -77,8 +274,13 @@ def api_history():
 
 @app.route('/api/history/<int:item_id>', methods=['DELETE'])
 def delete_history_item(item_id):
+    current_user = get_current_user()
+    if not current_user:
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+
     try:
-        item = History.query.get(item_id)
+        # Get item and ensure it belongs to the current user
+        item = History.query.filter_by(id=item_id, user_id=current_user.id).first()
         if not item:
             return jsonify({'status': 'error', 'message': 'Item not found'}), 404
         db.session.delete(item)
@@ -91,6 +293,10 @@ def delete_history_item(item_id):
 
 @app.route('/api/chat', methods=['POST'])
 def api_chat():
+    current_user = get_current_user()
+    if not current_user:
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+
     data = request.json
     message = data.get('message')
     mode = data.get('mode', 'general')
@@ -107,7 +313,7 @@ def api_chat():
     response_text = ai_engine.get_ai_response(message, context=system_instruction)
     
     try:
-        new_entry = History(type=mode, content=json.dumps({'query': message, 'response': response_text}))
+        new_entry = History(user_id=current_user.id, type=mode, content=json.dumps({'query': message, 'response': response_text}))
         db.session.add(new_entry)
         db.session.commit()
     except Exception as e:
@@ -116,8 +322,13 @@ def api_chat():
     
     return jsonify({'response': response_text})
 
+
 @app.route('/api/generate-notes', methods=['POST'])
 def generate_notes():
+    current_user = get_current_user()
+    if not current_user:
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+
     topic = request.form.get('topic')
     file = request.files.get('file')
     
@@ -162,13 +373,15 @@ def generate_notes():
         if not notes_content or len(notes_content) < 50:
             raise ValueError("Insufficient AI response for notes")
 
-        new_entry = History(type='notes', topic=display_topic, content=notes_content)
+        new_entry = History(user_id=current_user.id, type='notes', topic=display_topic, content=notes_content)
         db.session.add(new_entry)
         db.session.commit()
         
-        # Cache for RAG operations
-        document_store["current_text"] = extracted_text if extracted_text else notes_content
-        document_store["topic"] = display_topic
+        # Cache for RAG operations (user isolated)
+        document_store[current_user.id] = {
+            "current_text": extracted_text if extracted_text else notes_content,
+            "topic": display_topic
+        }
         
     except Exception as e:
         print(f"Notes generation error: {e}")
@@ -177,26 +390,43 @@ def generate_notes():
     
     return jsonify({'notes': notes_content})
 
+
 @app.route('/api/document-status', methods=['GET'])
 def document_status():
+    current_user = get_current_user()
+    if not current_user:
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+
+    user_doc = document_store.get(current_user.id, {"current_text": "", "topic": ""})
     return jsonify({
-        'has_document': bool(document_store["current_text"]),
-        'topic': document_store.get("topic", "")
+        'has_document': bool(user_doc["current_text"]),
+        'topic': user_doc.get("topic", "")
     })
+
 
 @app.route('/api/rag-chat', methods=['POST'])
 def rag_chat():
+    current_user = get_current_user()
+    if not current_user:
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+
     data = request.json
     query = data.get('query')
     
-    if not document_store["current_text"]:
+    user_doc = document_store.get(current_user.id, {"current_text": "", "topic": ""})
+    if not user_doc["current_text"]:
         return jsonify({'response': "No document context found. Please generate or upload notes first."})
         
-    response = ai_engine.perform_rag(query, document_store["current_text"])
+    response = ai_engine.perform_rag(query, user_doc["current_text"])
     return jsonify({'response': response})
+
 
 @app.route('/api/generate-quiz', methods=['POST'])
 def generate_quiz():
+    current_user = get_current_user()
+    if not current_user:
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+
     data = request.json
     topic = data.get('topic')
     num_questions = data.get('num_questions', 10)
@@ -231,7 +461,7 @@ def generate_quiz():
             })
     
     try:
-        new_entry = History(type='quiz', topic=topic, content=json.dumps(quiz_data))
+        new_entry = History(user_id=current_user.id, type='quiz', topic=topic, content=json.dumps(quiz_data))
         db.session.add(new_entry)
         db.session.commit()
     except Exception as e:
@@ -240,8 +470,13 @@ def generate_quiz():
     
     return jsonify({'quiz': quiz_data})
 
+
 @app.route('/api/recommend', methods=['POST'])
 def recommend():
+    current_user = get_current_user()
+    if not current_user:
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+
     data = request.json
     interests = data.get('interests')
     level = data.get('level', 'Beginner')
@@ -273,7 +508,7 @@ def recommend():
     roadmap = ai_engine.get_ai_response(prompt, context=system_instruction)
     
     try:
-        new_entry = History(type='recommendation', topic=goal, content=roadmap)
+        new_entry = History(user_id=current_user.id, type='recommendation', topic=goal, content=roadmap)
         db.session.add(new_entry)
         db.session.commit()
     except Exception as e:
