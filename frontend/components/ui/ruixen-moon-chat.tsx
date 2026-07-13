@@ -388,7 +388,7 @@ export default function RuixenMoonChat() {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-[#0a0f1d] text-white">
-      {/* 📁 Clean History Sidebar */}
+      {/* 📁 Clean Sidebar with Modules & History */}
       <aside
         className={cn(
           "flex flex-col border-r border-white/10 bg-[#0f172a] transition-all duration-300 relative z-20 h-full shadow-2xl",
@@ -397,9 +397,9 @@ export default function RuixenMoonChat() {
       >
         <div className="flex items-center justify-between p-5 border-b border-white/10">
           <div className="flex items-center gap-2">
-            <History className="h-4.5 w-4.5 text-[#FFEF4D] drop-shadow-[0_0_4px_rgba(255,239,77,0.35)]" />
+            <Cpu className="h-4.5 w-4.5 text-[#FFEF4D] drop-shadow-[0_0_4px_rgba(255,239,77,0.35)] animate-pulse" />
             <span className="text-xs font-black tracking-widest text-[#FFEF4D] uppercase">
-              Footprint History
+              CourseMate Console
             </span>
           </div>
           <Button
@@ -412,14 +412,56 @@ export default function RuixenMoonChat() {
           </Button>
         </div>
 
+        {/* 🛠️ Sidebar Modules/Triggers */}
+        <div className="p-4 border-b border-white/5 space-y-2 bg-[#0b0f19]/35">
+          <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase block mb-1">
+            Learning Modules
+          </span>
+
+          <button
+            onClick={() => triggerQuickAction("notes")}
+            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-white/5 bg-[#131b2e]/60 hover:bg-[#1e293b] text-neutral-300 hover:text-white transition-all text-xs font-semibold shadow-sm active:scale-[0.98] cursor-pointer"
+          >
+            <FileText className="h-4 w-4 text-[#FFEF4D]" />
+            <span>Notes Generator</span>
+          </button>
+
+          <button
+            onClick={() => triggerQuickAction("tutor")}
+            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-white/5 bg-[#131b2e]/60 hover:bg-[#1e293b] text-neutral-300 hover:text-white transition-all text-xs font-semibold shadow-sm active:scale-[0.98] cursor-pointer"
+          >
+            <Cpu className="h-4 w-4 text-[#FFEF4D]" />
+            <span>AI Tutor Room</span>
+          </button>
+
+          <button
+            onClick={() => triggerQuickAction("quiz")}
+            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-white/5 bg-[#131b2e]/60 hover:bg-[#1e293b] text-neutral-300 hover:text-white transition-all text-xs font-semibold shadow-sm active:scale-[0.98] cursor-pointer"
+          >
+            <Brain className="h-4 w-4 text-[#FFEF4D]" />
+            <span>Quiz Practice Lab</span>
+          </button>
+
+          <button
+            onClick={() => triggerQuickAction("pathfinder")}
+            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-white/5 bg-[#131b2e]/60 hover:bg-[#1e293b] text-neutral-300 hover:text-white transition-all text-xs font-semibold shadow-sm active:scale-[0.98] cursor-pointer"
+          >
+            <Compass className="h-4 w-4 text-[#FFEF4D]" />
+            <span>Pathfinder Advisor</span>
+          </button>
+        </div>
+
         {/* History List (Scroll hidden) */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-1 bg-[#0b0f19] no-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-[#0b0f19] no-scrollbar border-t border-white/5">
+          <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase block mb-1">
+            Footprint Logs
+          </span>
           {historyItems.length > 0 ? (
             historyItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => loadHistoryItem(item)}
-                className="w-full text-left p-3 rounded-xl border border-white/5 bg-[#131b2e]/60 hover:bg-[#1e293b] hover:border-white/10 transition-all flex items-start gap-3 group active:scale-[0.98] shadow-sm"
+                className="w-full text-left p-3 rounded-xl border border-white/5 bg-[#131b2e]/40 hover:bg-[#1e293b] hover:border-white/10 transition-all flex items-start gap-3 group active:scale-[0.98] shadow-sm"
               >
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/5 text-neutral-300 group-hover:text-[#FFEF4D] transition-colors shrink-0 mt-0.5">
                   {item.type === "chat" ? (
@@ -445,7 +487,7 @@ export default function RuixenMoonChat() {
           ) : (
             <div className="flex flex-col items-center justify-center py-20 text-center text-neutral-600">
               <HelpCircle className="h-7 w-7 mb-2 opacity-50" />
-              <span className="text-[11px] font-semibold">No footprints yet.</span>
+              <span className="text-[11px] font-semibold text-neutral-500">No footprints yet.</span>
             </div>
           )}
         </div>
@@ -812,45 +854,6 @@ export default function RuixenMoonChat() {
                 </Button>
               </div>
             </div>
-          </div>
-
-          {/* Quick actions bar */}
-          <div className="flex items-center justify-center flex-wrap gap-2 mt-5">
-            <Button
-              variant="outline"
-              onClick={() => triggerQuickAction("notes")}
-              className="flex items-center gap-1.5 rounded-full border-white/10 bg-white/[0.02] text-neutral-400 hover:text-white hover:bg-white/[0.04] transition-all text-[10px] h-7.5 px-3 font-semibold"
-            >
-              <FileText className="w-3 h-3 text-[#FFEF4D]" />
-              <span>Notes Generator</span>
-            </Button>
-
-            <Button
-              variant="outline"
-              onClick={() => triggerQuickAction("tutor")}
-              className="flex items-center gap-1.5 rounded-full border-white/10 bg-white/[0.02] text-neutral-400 hover:text-white hover:bg-white/[0.04] transition-all text-[10px] h-7.5 px-3 font-semibold"
-            >
-              <Cpu className="w-3 h-3 text-[#FFEF4D]" />
-              <span>AI Tutor</span>
-            </Button>
-
-            <Button
-              variant="outline"
-              onClick={() => triggerQuickAction("quiz")}
-              className="flex items-center gap-1.5 rounded-full border-white/10 bg-white/[0.02] text-neutral-400 hover:text-white hover:bg-white/[0.04] transition-all text-[10px] h-7.5 px-3 font-semibold"
-            >
-              <Brain className="w-3 h-3 text-[#FFEF4D]" />
-              <span>Quiz Lab</span>
-            </Button>
-
-            <Button
-              variant="outline"
-              onClick={() => triggerQuickAction("pathfinder")}
-              className="flex items-center gap-1.5 rounded-full border-white/10 bg-white/[0.02] text-neutral-400 hover:text-white hover:bg-white/[0.04] transition-all text-[10px] h-7.5 px-3 font-semibold"
-            >
-              <Compass className="w-3 h-3 text-[#FFEF4D]" />
-              <span>Pathfinder</span>
-            </Button>
           </div>
         </div>
       </div>
