@@ -25,6 +25,16 @@ import {
   Paperclip,
   Trophy,
   Plus,
+  SquarePen,
+  Search,
+  BookOpen,
+  Folder,
+  Clock,
+  Plug,
+  Code2,
+  MoreHorizontal,
+  Store,
+  Circle,
 } from "lucide-react";
 
 interface AutoResizeProps {
@@ -102,6 +112,7 @@ export default function RuixenMoonChat() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [historyItems, setHistoryItems] = useState<any[]>([]);
+  const [historySearchQuery, setHistorySearchQuery] = useState("");
   
   // File Attachment State
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
@@ -402,128 +413,175 @@ export default function RuixenMoonChat() {
     setMessages((prev) => prev.filter((msg) => msg.id !== id));
   };
 
+  const filteredHistory = historyItems.filter((item) => {
+    if (!historySearchQuery) return true;
+    const topicMatches = item.topic?.toLowerCase().includes(historySearchQuery.toLowerCase());
+    const contentMatches = item.content?.toLowerCase().includes(historySearchQuery.toLowerCase());
+    return topicMatches || contentMatches;
+  });
+
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#0a0f1d] text-white">
-      {/* 📁 Clean Sidebar with Modules & History */}
+    <div className="flex h-screen w-full overflow-hidden bg-[#0d0d0d] text-white">
+      {/* 📁 Premium ChatGPT-Style Sidebar */}
       <aside
         className={cn(
-          "flex flex-col border-r border-white/10 bg-[#0f172a] transition-all duration-300 relative z-20 h-full shadow-2xl",
-          isSidebarOpen ? "w-72" : "w-0 overflow-hidden border-r-0"
+          "flex flex-col border-r border-neutral-900 bg-[#000000] transition-all duration-300 relative z-20 h-full shadow-2xl",
+          isSidebarOpen ? "w-[260px]" : "w-0 overflow-hidden border-r-0"
         )}
       >
-        <div className="flex items-center justify-between p-5 border-b border-white/10">
-          <div className="flex items-center gap-2">
-            <Cpu className="h-4.5 w-4.5 text-[#FFEF4D] drop-shadow-[0_0_4px_rgba(255,239,77,0.35)] animate-pulse" />
-            <span className="text-xs font-black tracking-widest text-[#FFEF4D] uppercase">
-              CourseMate Console
-            </span>
+        {/* Top Header Controls */}
+        <div className="p-3.5 pb-2 flex flex-col gap-2">
+          {/* New Chat Button */}
+          <div className="flex items-center justify-between gap-2">
+            <button
+              onClick={clearChat}
+              className="flex-1 flex items-center justify-between px-3 py-2 rounded-lg bg-[#171717] hover:bg-[#262626] text-white text-xs font-semibold transition-all active:scale-[0.98] cursor-pointer"
+            >
+              <span className="flex items-center gap-2">
+                <SquarePen className="h-3.5 w-3.5 text-neutral-200" />
+                <span>New chat</span>
+              </span>
+            </button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsSidebarOpen(false)}
+              className="h-8 w-8 text-neutral-400 hover:text-white hover:bg-neutral-900 rounded-lg"
+            >
+              <PanelLeftClose className="h-3.5 w-3.5" />
+            </Button>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsSidebarOpen(false)}
-            className="h-8 w-8 text-neutral-400 hover:text-white hover:bg-white/5 rounded-lg"
-          >
-            <PanelLeftClose className="h-4 w-4" />
-          </Button>
+
+          {/* Search chats */}
+          <div className="relative mt-1">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-500" />
+            <input
+              type="text"
+              value={historySearchQuery}
+              onChange={(e) => setHistorySearchQuery(e.target.value)}
+              placeholder="Search chats"
+              className="w-full pl-8.5 pr-3 py-1.5 bg-transparent text-xs text-neutral-200 placeholder:text-neutral-500 border border-neutral-800 rounded-lg outline-none focus:border-neutral-700 transition-colors"
+            />
+          </div>
         </div>
 
-        {/* 🛠️ Sidebar Modules/Triggers */}
-        <div className="p-4 border-b border-white/5 space-y-2 bg-[#0b0f19]/35">
-          <Button
-            onClick={clearChat}
-            className="w-full flex items-center justify-center gap-2 bg-[#FFEF4D] text-[#030712] hover:bg-[#fff37a] text-xs h-9.5 rounded-xl font-extrabold active:scale-[0.98] cursor-pointer mb-2"
-          >
-            <Plus className="h-4 w-4" /> New Chat Session
-          </Button>
-
-          <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase block mb-1">
-            Learning Modules
-          </span>
-
+        {/* Navigation / Features list */}
+        <div className="px-2.5 py-1 space-y-0.5 border-b border-neutral-900">
           <button
             onClick={() => triggerQuickAction("notes")}
-            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-white/5 bg-[#131b2e]/60 hover:bg-[#1e293b] text-neutral-300 hover:text-white transition-all text-xs font-semibold shadow-sm active:scale-[0.98] cursor-pointer"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-neutral-300 hover:bg-neutral-900 transition-all text-xs font-medium cursor-pointer"
           >
-            <FileText className="h-4 w-4 text-[#FFEF4D]" />
-            <span>Notes Generator</span>
+            <BookOpen className="h-3.5 w-3.5 text-neutral-400" />
+            <span>Library (Notes)</span>
           </button>
 
           <button
             onClick={() => triggerQuickAction("tutor")}
-            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-white/5 bg-[#131b2e]/60 hover:bg-[#1e293b] text-neutral-300 hover:text-white transition-all text-xs font-semibold shadow-sm active:scale-[0.98] cursor-pointer"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-neutral-300 hover:bg-neutral-900 transition-all text-xs font-medium cursor-pointer"
           >
-            <Cpu className="h-4 w-4 text-[#FFEF4D]" />
-            <span>AI Tutor Room</span>
+            <Cpu className="h-3.5 w-3.5 text-neutral-400" />
+            <span>Projects (Tutor)</span>
           </button>
 
           <button
             onClick={() => triggerQuickAction("quiz")}
-            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-white/5 bg-[#131b2e]/60 hover:bg-[#1e293b] text-neutral-300 hover:text-white transition-all text-xs font-semibold shadow-sm active:scale-[0.98] cursor-pointer"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-neutral-300 hover:bg-neutral-900 transition-all text-xs font-medium cursor-pointer"
           >
-            <Brain className="h-4 w-4 text-[#FFEF4D]" />
-            <span>Quiz Practice Lab</span>
+            <Clock className="h-3.5 w-3.5 text-neutral-400" />
+            <span>Scheduled (Quiz)</span>
           </button>
 
           <button
             onClick={() => triggerQuickAction("pathfinder")}
-            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-white/5 bg-[#131b2e]/60 hover:bg-[#1e293b] text-neutral-300 hover:text-white transition-all text-xs font-semibold shadow-sm active:scale-[0.98] cursor-pointer"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-neutral-300 hover:bg-neutral-900 transition-all text-xs font-medium cursor-pointer"
           >
-            <Compass className="h-4 w-4 text-[#FFEF4D]" />
-            <span>Pathfinder Advisor</span>
+            <Plug className="h-3.5 w-3.5 text-neutral-400" />
+            <span>Plugins (Pathfinder)</span>
           </button>
+
+          <div className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-neutral-300 hover:bg-neutral-900 transition-all text-xs font-medium cursor-pointer">
+            <Code2 className="h-3.5 w-3.5 text-neutral-400" />
+            <span>Codex</span>
+          </div>
+
+          <div className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-neutral-300 hover:bg-neutral-900 transition-all text-xs font-medium cursor-pointer">
+            <MoreHorizontal className="h-3.5 w-3.5 text-neutral-400" />
+            <span>More</span>
+          </div>
         </div>
 
-        {/* History List (Scroll hidden) */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-[#0b0f19] no-scrollbar border-t border-white/5">
-          <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase block mb-1">
-            Footprint Logs
-          </span>
-          {historyItems.length > 0 ? (
-            historyItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => loadHistoryItem(item)}
-                className="w-full text-left p-3 rounded-xl border border-white/5 bg-[#131b2e]/40 hover:bg-[#1e293b] hover:border-white/10 transition-all flex items-start gap-3 group active:scale-[0.98] shadow-sm"
-              >
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/5 text-neutral-300 group-hover:text-[#FFEF4D] transition-colors shrink-0 mt-0.5">
-                  {item.type === "chat" ? (
-                    <MessageSquare className="h-3.5 w-3.5" />
-                  ) : item.type === "notes" ? (
-                    <FileText className="h-3.5 w-3.5" />
-                  ) : item.type === "quiz" ? (
-                    <Brain className="h-3.5 w-3.5" />
-                  ) : (
-                    <Compass className="h-3.5 w-3.5" />
-                  )}
-                </div>
-                <div className="overflow-hidden">
-                  <span className="inline-block text-[9px] uppercase font-bold tracking-wider text-[#FFEF4D]/70 mb-0.5">
-                    {item.type}
-                  </span>
-                  <p className="text-xs font-bold text-neutral-300 truncate group-hover:text-white transition-colors">
-                    {item.topic || "Interaction"}
-                  </p>
-                </div>
-              </button>
-            ))
-          ) : (
-            <div className="flex flex-col items-center justify-center py-20 text-center text-neutral-600">
-              <HelpCircle className="h-7 w-7 mb-2 opacity-50" />
-              <span className="text-[11px] font-semibold text-neutral-500">No footprints yet.</span>
+        {/* Scrollable logs matching the exact sections */}
+        <div className="flex-1 overflow-y-auto px-2.5 py-3 space-y-4 no-scrollbar">
+          {/* Static Pinned Section */}
+          <div className="space-y-1">
+            <span className="px-3 text-[10px] font-bold text-neutral-500 tracking-wider block mb-1">
+              Pinned
+            </span>
+            <div className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-neutral-900 cursor-pointer">
+              <span className="text-xs text-neutral-300 truncate">Admission Banner Design</span>
+              <span className="h-1.5 w-1.5 rounded-full bg-blue-500 shrink-0" />
             </div>
-          )}
+            <div className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-neutral-900 cursor-pointer">
+              <span className="text-xs text-neutral-300 truncate">frist day problem</span>
+            </div>
+            <div className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-neutral-900 cursor-pointer">
+              <span className="text-xs text-neutral-300 truncate">3rd day problem</span>
+            </div>
+            <div className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-neutral-900 cursor-pointer">
+              <span className="text-xs text-neutral-300 truncate">Job search update</span>
+            </div>
+          </div>
+
+          {/* Dynamic Recent History Section */}
+          <div className="space-y-1 pt-2">
+            <span className="px-3 text-[10px] font-bold text-neutral-500 tracking-wider block mb-1">
+              Recents (Footprints)
+            </span>
+            {filteredHistory.length > 0 ? (
+              filteredHistory.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => loadHistoryItem(item)}
+                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-neutral-900 transition-all flex items-center gap-2.5 text-neutral-300 truncate active:scale-[0.98]"
+                >
+                  <MessageSquare className="h-3.5 w-3.5 text-neutral-500 shrink-0" />
+                  <span className="text-xs truncate">{item.topic || "Interaction"}</span>
+                </button>
+              ))
+            ) : (
+              <div className="px-3 py-4 text-center text-[10px] text-neutral-600">
+                No recent footprint logs.
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Sidebar Footer Controls */}
-        <div className="p-4 border-t border-white/10 bg-[#0f172a]">
+        {/* Clear All History Button */}
+        <div className="px-3.5 py-1.5 border-t border-neutral-900 bg-black">
           <Button
             onClick={clearAllHistory}
-            variant="outline"
-            className="w-full justify-start gap-2 border-white/10 bg-[#0b0f19] hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/20 text-xs h-9 rounded-xl font-bold"
+            variant="ghost"
+            className="w-full justify-start gap-2 text-neutral-500 hover:text-rose-400 hover:bg-neutral-900 text-[11px] h-8 rounded-lg font-bold"
           >
             <Trash2 className="h-3.5 w-3.5" /> Clear All History
           </Button>
+        </div>
+
+        {/* Premium Profile Card matching mockup */}
+        <div className="p-3.5 border-t border-neutral-900 bg-black flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 overflow-hidden">
+            {/* Styled Avatar Placeholder */}
+            <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center font-bold text-neutral-950 text-xs shrink-0 select-none shadow">
+              HS
+            </div>
+            <div className="flex flex-col text-left overflow-hidden">
+              <span className="text-xs font-bold text-neutral-200 truncate">Himanshu Shakya</span>
+              <span className="text-[10px] text-neutral-500 font-semibold truncate leading-none mt-0.5">Go</span>
+            </div>
+          </div>
+          <button className="text-neutral-400 hover:text-white transition-colors cursor-pointer">
+            <Store className="h-4.5 w-4.5" />
+          </button>
         </div>
       </aside>
 
