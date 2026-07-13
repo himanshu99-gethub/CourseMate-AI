@@ -383,18 +383,18 @@ export default function RuixenMoonChat() {
   };
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#030712] text-white">
+    <div className="flex h-screen w-full overflow-hidden bg-[#0a0f1d] text-white">
       {/* 📁 Clean History Sidebar */}
       <aside
         className={cn(
-          "flex flex-col border-r border-white/[0.04] bg-[#090d16] transition-all duration-300 relative z-20 h-full",
+          "flex flex-col border-r border-white/10 bg-[#0f172a] transition-all duration-300 relative z-20 h-full shadow-2xl",
           isSidebarOpen ? "w-72" : "w-0 overflow-hidden border-r-0"
         )}
       >
-        <div className="flex items-center justify-between p-5 border-b border-white/[0.04]">
+        <div className="flex items-center justify-between p-5 border-b border-white/10">
           <div className="flex items-center gap-2">
-            <History className="h-4 w-4 text-neutral-400" />
-            <span className="text-[11px] font-black tracking-widest text-neutral-400 uppercase">
+            <History className="h-4.5 w-4.5 text-[#FFEF4D] drop-shadow-[0_0_4px_rgba(255,239,77,0.35)]" />
+            <span className="text-xs font-black tracking-widest text-[#FFEF4D] uppercase">
               Footprint History
             </span>
           </div>
@@ -409,15 +409,15 @@ export default function RuixenMoonChat() {
         </div>
 
         {/* History List */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-1">
+        <div className="flex-1 overflow-y-auto p-3 space-y-1 bg-[#0b0f19]">
           {historyItems.length > 0 ? (
             historyItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => loadHistoryItem(item)}
-                className="w-full text-left p-2.5 rounded-xl border border-transparent hover:border-white/[0.04] hover:bg-white/[0.02] transition-all flex items-start gap-3 group active:scale-[0.98]"
+                className="w-full text-left p-3 rounded-xl border border-white/5 bg-[#131b2e]/60 hover:bg-[#1e293b] hover:border-white/10 transition-all flex items-start gap-3 group active:scale-[0.98] shadow-sm"
               >
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/[0.03] text-neutral-400 group-hover:text-[#FFEF4D] transition-colors shrink-0 mt-0.5">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/5 text-neutral-300 group-hover:text-[#FFEF4D] transition-colors shrink-0 mt-0.5">
                   {item.type === "chat" ? (
                     <MessageSquare className="h-3.5 w-3.5" />
                   ) : item.type === "notes" ? (
@@ -429,10 +429,10 @@ export default function RuixenMoonChat() {
                   )}
                 </div>
                 <div className="overflow-hidden">
-                  <span className="inline-block text-[9px] uppercase font-bold tracking-wider text-neutral-500 mb-0.5">
+                  <span className="inline-block text-[9px] uppercase font-bold tracking-wider text-[#FFEF4D]/70 mb-0.5">
                     {item.type}
                   </span>
-                  <p className="text-xs font-semibold text-neutral-300 truncate group-hover:text-white transition-colors">
+                  <p className="text-xs font-bold text-neutral-300 truncate group-hover:text-white transition-colors">
                     {item.topic || "Interaction"}
                   </p>
                 </div>
@@ -447,11 +447,11 @@ export default function RuixenMoonChat() {
         </div>
 
         {/* Sidebar Footer Controls */}
-        <div className="p-4 border-t border-white/[0.04]">
+        <div className="p-4 border-t border-white/10 bg-[#0f172a]">
           <Button
             onClick={clearChat}
             variant="outline"
-            className="w-full justify-start gap-2 border-white/[0.06] bg-[#030712] hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/20 text-xs h-9 rounded-xl font-bold"
+            className="w-full justify-start gap-2 border-white/10 bg-[#0b0f19] hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/20 text-xs h-9 rounded-xl font-bold"
           >
             <Trash2 className="h-3.5 w-3.5" /> Clear Console
           </Button>
@@ -459,12 +459,13 @@ export default function RuixenMoonChat() {
       </aside>
 
       {/* 🌌 Main Chat Window Area */}
-      <div className="flex-1 h-screen flex flex-col items-center overflow-hidden relative bg-[#030712]">
+      <div className="flex-1 h-screen flex flex-col items-center overflow-hidden relative bg-[#0b0f19]">
         {/* Subtle Ambient Light Filters (Clean UI style) */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[350px] w-[600px] rounded-full bg-gradient-to-b from-[#FFEF4D]/5 to-transparent blur-[120px] pointer-events-none" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[350px] w-[600px] rounded-full bg-gradient-to-b from-[#FFEF4D]/10 to-transparent blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-10 left-10 h-72 w-72 rounded-full bg-blue-500/5 blur-[100px] pointer-events-none" />
 
         {/* Header Panel */}
-        <header className="relative w-full max-w-5xl flex items-center justify-between p-4 z-10 border-b border-white/[0.04]">
+        <header className="relative w-full max-w-5xl flex items-center justify-between p-4 z-10 border-b border-white/10 bg-[#0f172a]/40 backdrop-blur-md">
           <div className="flex items-center gap-3">
             {!isSidebarOpen && (
               <Button
@@ -477,19 +478,19 @@ export default function RuixenMoonChat() {
               </Button>
             )}
             <div className="flex items-center gap-2">
-              <Cpu className="h-5 w-5 text-[#FFEF4D]" />
+              <Cpu className="h-5 w-5 text-[#FFEF4D] drop-shadow-[0_0_4px_rgba(255,239,77,0.45)]" />
               <span className="font-bold text-sm tracking-tight text-white">CourseMate AI</span>
             </div>
           </div>
 
           {/* Notes Context mode indicator */}
           {hasDocument && (
-            <div className="flex bg-[#090d16] border border-white/[0.06] rounded-xl p-1 text-[11px] font-bold">
+            <div className="flex bg-[#0b0f19] border border-white/10 rounded-xl p-1 text-[11px] font-bold">
               <button
                 onClick={() => setChatMode("general")}
                 className={cn(
                   "px-2.5 py-1 rounded-lg transition-colors",
-                  chatMode === "general" ? "bg-white text-[#030712]" : "text-neutral-400 hover:text-white"
+                  chatMode === "general" ? "bg-[#FFEF4D] text-[#030712]" : "text-neutral-400 hover:text-white"
                 )}
               >
                 🤖 Tutor
@@ -498,7 +499,7 @@ export default function RuixenMoonChat() {
                 onClick={() => setChatMode("notes")}
                 className={cn(
                   "px-2.5 py-1 rounded-lg transition-colors",
-                  chatMode === "notes" ? "bg-white text-[#030712]" : "text-neutral-400 hover:text-white"
+                  chatMode === "notes" ? "bg-[#FFEF4D] text-[#030712]" : "text-neutral-400 hover:text-white"
                 )}
               >
                 📄 Notes: {documentTopic}
@@ -511,8 +512,8 @@ export default function RuixenMoonChat() {
         <div className="flex-1 w-full max-w-3xl overflow-y-auto px-4 py-8 space-y-8 z-10">
           {messages.length === 0 && (
             <div className="h-full flex flex-col items-center justify-center text-center px-4">
-              <div className="h-12 w-12 rounded-2xl bg-white/[0.03] border border-white/[0.04] flex items-center justify-center mb-6">
-                <Cpu className="h-6 w-6 text-[#FFEF4D] animate-pulse" />
+              <div className="h-14 w-14 rounded-2xl bg-[#1e293b]/60 border border-white/10 flex items-center justify-center mb-6 shadow-md">
+                <Cpu className="h-7 w-7 text-[#FFEF4D] drop-shadow-[0_0_8px_rgba(255,239,77,0.5)] animate-pulse" />
               </div>
               <h1 className="text-4xl font-extrabold tracking-tight text-white">
                 How can I assist you today?
@@ -533,7 +534,7 @@ export default function RuixenMoonChat() {
             >
               {/* Clean User Message */}
               {msg.isUser && (
-                <div className="max-w-[75%] rounded-2xl bg-white/[0.04] border border-white/[0.06] text-white px-4 py-2.5 font-medium text-sm rounded-br-none shadow-sm">
+                <div className="max-w-[75%] rounded-2xl bg-[#1e293b] border border-white/10 text-white px-4 py-2.5 font-semibold text-sm rounded-br-none shadow-md">
                   {msg.text}
                 </div>
               )}
@@ -549,8 +550,8 @@ export default function RuixenMoonChat() {
                   <div className="flex-1 space-y-3 overflow-hidden">
                     {/* Notes (Clean Card) */}
                     {msg.type === "notes" && (
-                      <div className="bg-[#090d16] border border-white/[0.06] p-6 rounded-2xl shadow-xl w-full">
-                        <div className="flex items-center justify-between border-b border-white/[0.04] pb-3 mb-4">
+                      <div className="bg-[#0f172a] border border-white/10 p-6 rounded-2xl shadow-xl w-full">
+                        <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
                           <span className="text-xs font-bold text-[#FFEF4D] uppercase flex items-center gap-1.5">
                             <FileText className="h-3.5 w-3.5" /> Study Notes
                           </span>
@@ -558,13 +559,13 @@ export default function RuixenMoonChat() {
                             variant="ghost"
                             size="sm"
                             onClick={() => window.print()}
-                            className="flex items-center gap-1 h-7 border border-white/[0.06] hover:bg-white/5 text-[10px] text-neutral-300 font-bold px-2 rounded-lg"
+                            className="flex items-center gap-1 h-7 border border-white/10 hover:bg-white/5 text-[10px] text-neutral-300 font-bold px-2 rounded-lg"
                           >
                             <Printer className="h-3 w-3" /> Print / PDF
                           </Button>
                         </div>
                         <div
-                          className="prose prose-invert prose-xs max-w-none text-neutral-300 leading-relaxed prose-headings:text-white prose-strong:text-white prose-code:bg-white/5 prose-code:p-0.5 prose-code:rounded prose-ul:list-disc prose-ol:list-decimal"
+                          className="prose prose-invert prose-xs max-w-none text-neutral-300 leading-relaxed prose-headings:text-white prose-strong:text-[#FFEF4D] prose-code:bg-white/5 prose-code:p-0.5 prose-code:rounded prose-ul:list-disc prose-ol:list-decimal"
                           dangerouslySetInnerHTML={{ __html: marked.parse(msg.text) }}
                         />
                       </div>
@@ -572,8 +573,8 @@ export default function RuixenMoonChat() {
 
                     {/* Quiz (Clean Card) */}
                     {msg.type === "quiz" && msg.data?.quiz && (
-                      <div className="bg-[#090d16] border border-white/[0.06] p-6 rounded-2xl shadow-xl w-full">
-                        <div className="flex items-center justify-between border-b border-white/[0.04] pb-3 mb-4">
+                      <div className="bg-[#0f172a] border border-white/10 p-6 rounded-2xl shadow-xl w-full">
+                        <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
                           <span className="text-xs font-bold text-[#FFEF4D] uppercase flex items-center gap-1.5">
                             <Brain className="h-3.5 w-3.5" /> Interactive Quiz
                           </span>
@@ -601,12 +602,12 @@ export default function RuixenMoonChat() {
                                         className={cn(
                                           "text-left p-2.5 rounded-lg text-xs transition-all border outline-none font-semibold",
                                           selectedOption === undefined
-                                            ? "bg-[#030712] border-white/[0.04] hover:border-neutral-500 hover:bg-white/[0.02]"
+                                            ? "bg-[#0b0f19] border-white/5 hover:border-neutral-500 hover:bg-white/[0.02]"
                                             : isCorrect
                                             ? "bg-emerald-500/10 border-emerald-500 text-emerald-400"
                                             : selected
                                             ? "bg-rose-500/10 border-rose-500 text-rose-400"
-                                            : "bg-[#030712] border-white/[0.02] text-neutral-500 cursor-not-allowed"
+                                            : "bg-[#0b0f19] border-white/5 text-neutral-500 cursor-not-allowed"
                                         )}
                                       >
                                         <span>{opt}</span>
@@ -621,7 +622,7 @@ export default function RuixenMoonChat() {
 
                         {/* Complete Celebration */}
                         {Object.keys(msg.data.answers).length === msg.data.quiz.length && (
-                          <div className="mt-6 pt-4 border-t border-white/[0.04] flex items-center justify-center gap-2 text-center text-xs font-bold text-[#FFEF4D]">
+                          <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-center gap-2 text-center text-xs font-bold text-[#FFEF4D]">
                             <Trophy className="h-4 w-4" />
                             <span>Evaluation Complete! Good Work.</span>
                           </div>
@@ -631,8 +632,8 @@ export default function RuixenMoonChat() {
 
                     {/* Pathfinder (Clean Card) */}
                     {msg.type === "pathfinder" && (
-                      <div className="bg-[#090d16] border border-white/[0.06] p-6 rounded-2xl shadow-xl w-full">
-                        <div className="flex items-center gap-1.5 border-b border-white/[0.04] pb-3 mb-4">
+                      <div className="bg-[#0f172a] border border-white/10 p-6 rounded-2xl shadow-xl w-full">
+                        <div className="flex items-center gap-1.5 border-b border-white/10 pb-3 mb-4">
                           <Compass className="h-4 w-4 text-[#FFEF4D]" />
                           <span className="text-xs font-bold text-[#FFEF4D] uppercase">
                             Career Pathway
@@ -640,10 +641,10 @@ export default function RuixenMoonChat() {
                         </div>
 
                         {parseRoadmapSteps(msg.text).length > 0 ? (
-                          <div className="relative border-l border-white/[0.08] ml-2 pl-5 space-y-5">
+                          <div className="relative border-l border-white/10 ml-2 pl-5 space-y-5">
                             {parseRoadmapSteps(msg.text).map((step, idx) => (
                               <div key={idx} className="relative">
-                                <span className="absolute -left-[25px] top-1 flex h-3 w-3 items-center justify-center rounded-full bg-[#030712] border border-[#FFEF4D] text-[8px] font-black text-[#FFEF4D]">
+                                <span className="absolute -left-[25px] top-1 flex h-3 w-3 items-center justify-center rounded-full bg-[#0b0f19] border border-[#FFEF4D] text-[8px] font-black text-[#FFEF4D]">
                                   {idx + 1}
                                 </span>
                                 <h4 className="text-xs font-bold text-white">{step.title}</h4>
@@ -716,10 +717,10 @@ export default function RuixenMoonChat() {
             </div>
           )}
 
-          <div className="bg-[#090d16] rounded-2xl border border-white/[0.04] shadow-xl overflow-hidden focus-within:border-white/10 transition-colors">
+          <div className="bg-[#0f172a] rounded-2xl border border-white/10 shadow-xl overflow-hidden focus-within:border-white/20 transition-colors">
             {/* Attached file tag */}
             {attachedFile && (
-              <div className="flex items-center justify-between bg-white/[0.02] px-4 py-2 border-b border-white/[0.04] text-[11px]">
+              <div className="flex items-center justify-between bg-white/[0.02] px-4 py-2 border-b border-white/10 text-[11px]">
                 <span className="text-[#FFEF4D] font-bold truncate max-w-xs">
                   📄 {attachedFile.name}
                 </span>
@@ -753,7 +754,7 @@ export default function RuixenMoonChat() {
             />
 
             {/* Footer buttons */}
-            <div className="flex items-center justify-between px-3 pb-3 border-t border-white/[0.02] pt-2">
+            <div className="flex items-center justify-between px-3 pb-3 border-t border-white/10 pt-2">
               <Button
                 variant="ghost"
                 size="icon"
@@ -771,7 +772,7 @@ export default function RuixenMoonChat() {
                   className={cn(
                     "flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all text-xs font-bold h-8",
                     (message.trim() || attachedFile)
-                      ? "bg-white text-black hover:bg-neutral-200 active:scale-[0.98]"
+                      ? "bg-[#FFEF4D] text-[#030712] hover:bg-[#fff37a] active:scale-[0.98]"
                       : "bg-white/5 text-neutral-600 cursor-not-allowed"
                   )}
                 >
@@ -787,7 +788,7 @@ export default function RuixenMoonChat() {
             <Button
               variant="outline"
               onClick={() => triggerQuickAction("notes")}
-              className="flex items-center gap-1.5 rounded-full border-white/[0.04] bg-white/[0.02] text-neutral-400 hover:text-white hover:bg-white/[0.04] transition-all text-[10px] h-7.5 px-3 font-semibold"
+              className="flex items-center gap-1.5 rounded-full border-white/10 bg-white/[0.02] text-neutral-400 hover:text-white hover:bg-white/[0.04] transition-all text-[10px] h-7.5 px-3 font-semibold"
             >
               <FileText className="w-3 h-3 text-[#FFEF4D]" />
               <span>Notes Generator</span>
@@ -796,7 +797,7 @@ export default function RuixenMoonChat() {
             <Button
               variant="outline"
               onClick={() => triggerQuickAction("tutor")}
-              className="flex items-center gap-1.5 rounded-full border-white/[0.04] bg-white/[0.02] text-neutral-400 hover:text-white hover:bg-white/[0.04] transition-all text-[10px] h-7.5 px-3 font-semibold"
+              className="flex items-center gap-1.5 rounded-full border-white/10 bg-white/[0.02] text-neutral-400 hover:text-white hover:bg-white/[0.04] transition-all text-[10px] h-7.5 px-3 font-semibold"
             >
               <Cpu className="w-3 h-3 text-[#FFEF4D]" />
               <span>AI Tutor</span>
@@ -805,7 +806,7 @@ export default function RuixenMoonChat() {
             <Button
               variant="outline"
               onClick={() => triggerQuickAction("quiz")}
-              className="flex items-center gap-1.5 rounded-full border-white/[0.04] bg-white/[0.02] text-neutral-400 hover:text-white hover:bg-white/[0.04] transition-all text-[10px] h-7.5 px-3 font-semibold"
+              className="flex items-center gap-1.5 rounded-full border-white/10 bg-white/[0.02] text-neutral-400 hover:text-white hover:bg-white/[0.04] transition-all text-[10px] h-7.5 px-3 font-semibold"
             >
               <Brain className="w-3 h-3 text-[#FFEF4D]" />
               <span>Quiz Lab</span>
@@ -814,7 +815,7 @@ export default function RuixenMoonChat() {
             <Button
               variant="outline"
               onClick={() => triggerQuickAction("pathfinder")}
-              className="flex items-center gap-1.5 rounded-full border-white/[0.04] bg-white/[0.02] text-neutral-400 hover:text-white hover:bg-white/[0.04] transition-all text-[10px] h-7.5 px-3 font-semibold"
+              className="flex items-center gap-1.5 rounded-full border-white/10 bg-white/[0.02] text-neutral-400 hover:text-white hover:bg-white/[0.04] transition-all text-[10px] h-7.5 px-3 font-semibold"
             >
               <Compass className="w-3 h-3 text-[#FFEF4D]" />
               <span>Pathfinder</span>
