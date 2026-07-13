@@ -5,9 +5,18 @@ from datetime import datetime
 import json
 from utils import ai_engine
 
-app = Flask(__name__, static_folder='frontend/out', static_url_path='')
+base_dir = os.path.dirname(os.path.abspath(__file__))
+static_folder = os.path.join(base_dir, 'frontend/out')
+
+app = Flask(__name__, static_folder=static_folder, static_url_path='')
 app.config['SECRET_KEY'] = 'coursemate_ai_secret_key_123'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+
+is_vercel = os.getenv('VERCEL') == '1' or os.getenv('AWS_LAMBDA_FUNCTION_NAME') is not None
+if is_vercel:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/database.db'
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)

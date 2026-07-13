@@ -4,9 +4,54 @@ import json
 
 genai = None
 from openai import OpenAI
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
+import math
+import re
+
+def tokenize(text):
+    return re.findall(r'\b\w+\b', text.lower())
+
+class SimpleTfidf:
+    def __init__(self, documents):
+        self.vocab = {}
+        self.idf = {}
+        self.doc_count = len(documents)
+        
+        df = {}
+        for doc in documents:
+            words = set(tokenize(doc))
+            for word in words:
+                df[word] = df.get(word, 0) + 1
+                
+        idx = 0
+        for word, count in df.items():
+            self.vocab[word] = idx
+            idx += 1
+            self.idf[word] = math.log(1.0 + (self.doc_count / count))
+            
+    def _doc_to_vector(self, doc):
+        words = tokenize(doc)
+        tf = {}
+        for word in words:
+            if word in self.vocab:
+                tf[word] = tf.get(word, 0) + 1
+                
+        vector = [0.0] * len(self.vocab)
+        for word, freq in tf.items():
+            word_idx = self.vocab[word]
+            vector[word_idx] = freq * self.idf[word]
+            
+        magnitude = math.sqrt(sum(val * val for val in vector))
+        if magnitude > 0:
+            vector = [val / magnitude for val in vector]
+        return vector
+
+    def get_similarities(self, query, doc_vectors):
+        query_vector = self._doc_to_vector(query)
+        similarities = []
+        for doc_vector in doc_vectors:
+            dot_product = sum(q * d for q, d in zip(query_vector, doc_vector))
+            similarities.append(dot_product)
+        return similarities
 from dotenv import load_dotenv
 import PyPDF2
 import io
@@ -71,8 +116,8 @@ class CourseMateAI:
             "Cybersecurity Ethics",
             "Financial Literacy & Investing"
         ]
-        self.vectorizer = TfidfVectorizer()
-        self.course_vectors = self.vectorizer.fit_transform(self.courses)
+        self.tfidf = SimpleTfidf(self.courses)
+        self.course_vectors = [self.tfidf._doc_to_vector(course) for course in self.courses]
 
     def extract_text_from_file(self, file):
         """
@@ -146,11 +191,11 @@ class CourseMateAI:
 
     def recommend_courses(self, user_interests):
         """
-        Basic ML recommendation logic using Sine Similarity.
+        Basic ML recommendation logic using Cosine Similarity.
         """
-        user_vector = self.vectorizer.transform([user_interests])
-        similarities = cosine_similarity(user_vector, self.course_vectors).flatten()
-        related_indices = np.argsort(similarities)[-3:][::-1]
+        similarities = self.tfidf.get_similarities(user_interests, self.course_vectors)
+        sorted_indices = sorted(range(len(similarities)), key=lambda i: similarities[i], reverse=True)
+        related_indices = sorted_indices[:3]
         
         # If no similarity (similarity sum is 0), return random/default
         if sum(similarities) == 0:
@@ -168,20 +213,21 @@ class CourseMateAI:
         # 1. Chunking
         chunks = [full_text[i:i+1000] for i in range(0, len(full_text), 800)]
         
-        # 2. Vector Search (Retreival)
+        # 2. Vector Search (Retrieval)
         try:
-            temp_vectorizer = TfidfVectorizer()
-            chunk_vectors = temp_vectorizer.fit_transform(chunks)
-            query_vector = temp_vectorizer.transform([query])
+            temp_tfidf = SimpleTfidf(chunks)
+            chunk_vectors = [temp_tfidf._doc_to_vector(chunk) for chunk in chunks]
+            similarities = temp_tfidf.get_similarities(query, chunk_vectors)
             
-            similarities = cosine_similarity(query_vector, chunk_vectors).flatten()
-            top_indices = np.argsort(similarities)[-3:][::-1]
+            sorted_indices = sorted(range(len(similarities)), key=lambda i: similarities[i], reverse=True)
+            top_indices = sorted_indices[:3]
             
             relevant_context = "\n---\n".join([chunks[i] for i in top_indices if similarities[i] > 0.05])
             
             if not relevant_context:
                 relevant_context = full_text[:2000] # Fallback to beginning of doc
-        except:
+        except Exception as e:
+            print(f"RAG search error: {e}")
             relevant_context = full_text[:2000]
 
         # 3. Augmentation & Generation
