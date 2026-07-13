@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Gold/Yellow Gradient -->
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" /> <!-- Amber-500 -->
+      <stop offset="50%" stop-color="#eab308" /> <!-- Yellow-500 -->
+      <stop offset="100%" stop-color="#ca8a04" /> <!-- Yellow-600 -->
+    </linearGradient>
+  </defs>
+  <!-- Microchip design scaled to 512x512 -->
+  <g transform="scale(16)" stroke="url(#goldGradient)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- Outer box of the CPU -->
+    <rect width="18" height="18" x="7" y="7" rx="3" stroke-width="2" />
+    <!-- Center core -->
+    <rect width="6" height="6" x="13" y="13" rx="1.5" fill="url(#goldGradient)" fill-opacity="0.18" stroke-width="1.5" />
+    <!-- CPU pins -->
+    <!-- Top pins -->
+    <path d="M12 2v5" />
+    <path d="M16 2v5" />
+    <path d="M20 2v5" />
+    <!-- Bottom pins -->
+    <path d="M12 25v5" />
+    <path d="M16 25v5" />
+    <path d="M20 25v5" />
+    <!-- Left pins -->
+    <path d="M2 12h5" />
+    <path d="M2 16h5" />
+    <path d="M2 20h5" />
+    <!-- Right pins -->
+    <path d="M25 12h5" />
+    <path d="M25 16h5" />
+    <path d="M25 20h5" />
+  </g>
+</svg>
