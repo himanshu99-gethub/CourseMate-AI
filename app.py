@@ -58,6 +58,21 @@ def recommendations():
 
 # --- API Endpoints ---
 
+@app.route('/api/history', methods=['GET'])
+def api_history():
+    history_items = History.query.order_by(History.timestamp.desc()).all()
+    history_list = []
+    for item in history_items:
+        history_list.append({
+            'id': item.id,
+            'type': item.type,
+            'topic': item.topic,
+            'content': item.content,
+            'timestamp': item.timestamp.isoformat() if item.timestamp else None
+        })
+    return jsonify({'history': history_list})
+
+
 @app.route('/api/chat', methods=['POST'])
 def api_chat():
     data = request.json
