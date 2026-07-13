@@ -24,6 +24,7 @@ import {
   ArrowUp,
   Paperclip,
   Trophy,
+  Plus,
 } from "lucide-react";
 
 interface AutoResizeProps {
@@ -382,6 +383,21 @@ export default function RuixenMoonChat() {
     setAttachedFile(null);
   };
 
+  const clearAllHistory = async () => {
+    try {
+      await fetch("/api/history", { method: "DELETE" });
+      setHistoryItems([]);
+      setMessages([]);
+      setAttachedFile(null);
+      setCurrentFlow("general");
+      setChatMode("general");
+      setHasDocument(false);
+      setDocumentTopic("");
+    } catch (e) {
+      console.error("Failed to delete chat history:", e);
+    }
+  };
+
   const deleteMessage = (id: string) => {
     setMessages((prev) => prev.filter((msg) => msg.id !== id));
   };
@@ -414,6 +430,13 @@ export default function RuixenMoonChat() {
 
         {/* 🛠️ Sidebar Modules/Triggers */}
         <div className="p-4 border-b border-white/5 space-y-2 bg-[#0b0f19]/35">
+          <Button
+            onClick={clearChat}
+            className="w-full flex items-center justify-center gap-2 bg-[#FFEF4D] text-[#030712] hover:bg-[#fff37a] text-xs h-9.5 rounded-xl font-extrabold active:scale-[0.98] cursor-pointer mb-2"
+          >
+            <Plus className="h-4 w-4" /> New Chat Session
+          </Button>
+
           <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase block mb-1">
             Learning Modules
           </span>
@@ -495,11 +518,11 @@ export default function RuixenMoonChat() {
         {/* Sidebar Footer Controls */}
         <div className="p-4 border-t border-white/10 bg-[#0f172a]">
           <Button
-            onClick={clearChat}
+            onClick={clearAllHistory}
             variant="outline"
             className="w-full justify-start gap-2 border-white/10 bg-[#0b0f19] hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/20 text-xs h-9 rounded-xl font-bold"
           >
-            <Trash2 className="h-3.5 w-3.5" /> Clear Console
+            <Trash2 className="h-3.5 w-3.5" /> Clear All History
           </Button>
         </div>
       </aside>

@@ -58,8 +58,20 @@ def recommendations():
 
 # --- API Endpoints ---
 
-@app.route('/api/history', methods=['GET'])
+@app.route('/api/history', methods=['GET', 'DELETE'])
 def api_history():
+    if request.method == 'DELETE':
+        try:
+            History.query.delete()
+            db.session.commit()
+            # Reset in-memory cached documents as well
+            document_store["current_text"] = ""
+            document_store["topic"] = ""
+            return jsonify({'status': 'success', 'message': 'All chat history cleared'})
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'status': 'error', 'message': str(e)}), 500
+
     history_items = History.query.order_by(History.timestamp.desc()).all()
     history_list = []
     for item in history_items:
