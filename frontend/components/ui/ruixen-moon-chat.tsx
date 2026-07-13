@@ -631,16 +631,6 @@ export default function RuixenMoonChat() {
           )}
         </div>
 
-        {/* Sidebar Footer Controls */}
-        <div className="p-4 border-t border-white/10 bg-[#0f172a]">
-          <Button
-            onClick={clearAllHistory}
-            variant="outline"
-            className="w-full justify-start gap-2 border-white/10 bg-[#0b0f19] hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/20 text-xs h-9 rounded-xl font-bold"
-          >
-            <Trash2 className="h-3.5 w-3.5" /> Clear All History
-          </Button>
-        </div>
       </aside>
 
       {/* 🌌 Main Chat Window Area */}
