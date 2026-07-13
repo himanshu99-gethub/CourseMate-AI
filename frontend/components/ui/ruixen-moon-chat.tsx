@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -213,7 +213,11 @@ export default function RuixenMoonChat() {
 
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(() => {
+    // Start closed on mobile, open on desktop
+    if (typeof window !== "undefined") return window.innerWidth >= 768;
+    return false;
+  });
   const [historyItems, setHistoryItems] = useState<any[]>([]);
   
   // File Attachment State
@@ -709,7 +713,7 @@ export default function RuixenMoonChat() {
       </aside>
 
       {/* 🌌 Main Chat Window Area */}
-      <div className="flex-1 h-screen flex flex-col items-center overflow-hidden relative bg-[#0b0f19]">
+      <div className="flex-1 h-screen flex flex-col items-center overflow-hidden relative bg-[#0b0f19] pb-16 md:pb-0">
         {/* Subtle Ambient Light Filters (Clean UI style) */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[350px] w-[600px] rounded-full bg-gradient-to-b from-[#FFEF4D]/10 to-transparent blur-[120px] pointer-events-none" />
         <div className="absolute bottom-10 left-10 h-72 w-72 rounded-full bg-blue-500/5 blur-[100px] pointer-events-none" />
@@ -973,7 +977,7 @@ export default function RuixenMoonChat() {
         </div>
 
         {/* Input Console */}
-        <div className="relative w-full max-w-2xl mb-20 md:mb-8 px-2 md:px-4 z-10">
+        <div className="relative w-full max-w-2xl mb-2 md:mb-8 px-2 md:px-4 z-10">
           {/* Active Flow HUD Bar */}
           {currentFlow !== "general" && (
             <div className="flex items-center justify-between bg-[#FFEF4D]/5 border border-[#FFEF4D]/10 px-4 py-2 rounded-t-xl text-[10px] font-bold text-[#FFEF4D] mb-[-1px] animate-in slide-in-from-bottom-2">
