@@ -27,14 +27,11 @@ import {
   Plus,
   SquarePen,
   Search,
-  BookOpen,
   Folder,
   Clock,
-  Plug,
-  Code2,
   MoreHorizontal,
-  Store,
-  Circle,
+  Settings,
+  Library,
 } from "lucide-react";
 
 interface AutoResizeProps {
@@ -112,7 +109,6 @@ export default function RuixenMoonChat() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [historyItems, setHistoryItems] = useState<any[]>([]);
-  const [historySearchQuery, setHistorySearchQuery] = useState("");
   
   // File Attachment State
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
@@ -413,174 +409,160 @@ export default function RuixenMoonChat() {
     setMessages((prev) => prev.filter((msg) => msg.id !== id));
   };
 
-  const filteredHistory = historyItems.filter((item) => {
-    if (!historySearchQuery) return true;
-    const topicMatches = item.topic?.toLowerCase().includes(historySearchQuery.toLowerCase());
-    const contentMatches = item.content?.toLowerCase().includes(historySearchQuery.toLowerCase());
-    return topicMatches || contentMatches;
-  });
-
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#0d0d0d] text-white">
+    <div className="flex h-screen w-full overflow-hidden bg-[#0a0f1d] text-white">
       {/* 📁 Premium ChatGPT-Style Sidebar */}
       <aside
         className={cn(
-          "flex flex-col border-r border-neutral-900 bg-[#000000] transition-all duration-300 relative z-20 h-full shadow-2xl",
-          isSidebarOpen ? "w-[260px]" : "w-0 overflow-hidden border-r-0"
+          "flex flex-col border-r border-[#1a1a1a] bg-[#0d0d0d] transition-all duration-300 relative z-20 h-full shadow-2xl text-neutral-200",
+          isSidebarOpen ? "w-66" : "w-0 overflow-hidden border-r-0"
         )}
       >
-        {/* Top Header Controls */}
-        <div className="p-3.5 pb-2 flex flex-col gap-2">
-          {/* New Chat Button */}
-          <div className="flex items-center justify-between gap-2">
-            <button
-              onClick={clearChat}
-              className="flex-1 flex items-center justify-between px-3 py-2 rounded-lg bg-[#171717] hover:bg-[#262626] text-white text-xs font-semibold transition-all active:scale-[0.98] cursor-pointer"
-            >
-              <span className="flex items-center gap-2">
-                <SquarePen className="h-3.5 w-3.5 text-neutral-200" />
-                <span>New chat</span>
-              </span>
-            </button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsSidebarOpen(false)}
-              className="h-8 w-8 text-neutral-400 hover:text-white hover:bg-neutral-900 rounded-lg"
-            >
-              <PanelLeftClose className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-
-          {/* Search chats */}
-          <div className="relative mt-1">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-500" />
-            <input
-              type="text"
-              value={historySearchQuery}
-              onChange={(e) => setHistorySearchQuery(e.target.value)}
-              placeholder="Search chats"
-              className="w-full pl-8.5 pr-3 py-1.5 bg-transparent text-xs text-neutral-200 placeholder:text-neutral-500 border border-neutral-800 rounded-lg outline-none focus:border-neutral-700 transition-colors"
-            />
-          </div>
+        {/* Sidebar Header & Toggle */}
+        <div className="flex items-center justify-between p-4 pb-2">
+          <span className="text-xs font-black tracking-widest text-[#FFEF4D] uppercase">
+            CourseMate Console
+          </span>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsSidebarOpen(false)}
+            className="h-8 w-8 text-neutral-400 hover:text-white hover:bg-neutral-900 rounded-lg"
+          >
+            <PanelLeftClose className="h-4 w-4" />
+          </Button>
         </div>
 
-        {/* Navigation / Features list */}
-        <div className="px-2.5 py-1 space-y-0.5 border-b border-neutral-900">
+        {/* 🛠️ Top Actions Menu */}
+        <div className="p-3.5 space-y-1.5 border-b border-[#1a1a1a]">
           <button
-            onClick={() => triggerQuickAction("notes")}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-neutral-300 hover:bg-neutral-900 transition-all text-xs font-medium cursor-pointer"
+            onClick={clearChat}
+            className="w-full flex items-center justify-between px-3.5 py-2.5 bg-[#171717] hover:bg-[#222] border border-[#2a2a2a] text-white hover:text-white transition-all text-xs font-semibold rounded-lg shadow-sm active:scale-[0.98] cursor-pointer"
           >
-            <BookOpen className="h-3.5 w-3.5 text-neutral-400" />
-            <span>Library (Notes)</span>
+            <div className="flex items-center gap-2">
+              <SquarePen className="h-4 w-4 text-neutral-300" />
+              <span>New chat</span>
+            </div>
+          </button>
+
+          <button className="w-full flex items-center gap-3 px-3 py-2 text-neutral-400 hover:text-white hover:bg-neutral-900 rounded-lg text-xs font-semibold transition-all text-left">
+            <Search className="h-4 w-4 text-neutral-500" />
+            <span>Search chats</span>
+          </button>
+
+          <button className="w-full flex items-center gap-3 px-3 py-2 text-neutral-400 hover:text-white hover:bg-neutral-900 rounded-lg text-xs font-semibold transition-all text-left">
+            <Library className="h-4 w-4 text-neutral-500" />
+            <span>Library</span>
           </button>
 
           <button
-            onClick={() => triggerQuickAction("tutor")}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-neutral-300 hover:bg-neutral-900 transition-all text-xs font-medium cursor-pointer"
+            onClick={() => triggerQuickAction("notes")}
+            className="w-full flex items-center gap-3 px-3 py-2 text-neutral-400 hover:text-white hover:bg-neutral-900 rounded-lg text-xs font-semibold transition-all text-left"
           >
-            <Cpu className="h-3.5 w-3.5 text-neutral-400" />
-            <span>Projects (Tutor)</span>
+            <Folder className="h-4 w-4 text-neutral-500" />
+            <span>Projects / Notes</span>
           </button>
 
           <button
             onClick={() => triggerQuickAction("quiz")}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-neutral-300 hover:bg-neutral-900 transition-all text-xs font-medium cursor-pointer"
+            className="w-full flex items-center gap-3 px-3 py-2 text-neutral-400 hover:text-white hover:bg-neutral-900 rounded-lg text-xs font-semibold transition-all text-left"
           >
-            <Clock className="h-3.5 w-3.5 text-neutral-400" />
-            <span>Scheduled (Quiz)</span>
+            <Clock className="h-4 w-4 text-neutral-500" />
+            <span>Scheduled / Quizzes</span>
           </button>
 
           <button
             onClick={() => triggerQuickAction("pathfinder")}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-neutral-300 hover:bg-neutral-900 transition-all text-xs font-medium cursor-pointer"
+            className="w-full flex items-center gap-3 px-3 py-2 text-neutral-400 hover:text-white hover:bg-neutral-900 rounded-lg text-xs font-semibold transition-all text-left"
           >
-            <Plug className="h-3.5 w-3.5 text-neutral-400" />
-            <span>Plugins (Pathfinder)</span>
+            <Compass className="h-4 w-4 text-neutral-500" />
+            <span>Pathfinder AI</span>
           </button>
 
-          <div className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-neutral-300 hover:bg-neutral-900 transition-all text-xs font-medium cursor-pointer">
-            <Code2 className="h-3.5 w-3.5 text-neutral-400" />
-            <span>Codex</span>
-          </div>
-
-          <div className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-neutral-300 hover:bg-neutral-900 transition-all text-xs font-medium cursor-pointer">
-            <MoreHorizontal className="h-3.5 w-3.5 text-neutral-400" />
-            <span>More</span>
-          </div>
-        </div>
-
-        {/* Scrollable logs matching the exact sections */}
-        <div className="flex-1 overflow-y-auto px-2.5 py-3 space-y-4 no-scrollbar">
-          {/* Static Pinned Section */}
-          <div className="space-y-1">
-            <span className="px-3 text-[10px] font-bold text-neutral-500 tracking-wider block mb-1">
-              Pinned
-            </span>
-            <div className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-neutral-900 cursor-pointer">
-              <span className="text-xs text-neutral-300 truncate">Admission Banner Design</span>
-              <span className="h-1.5 w-1.5 rounded-full bg-blue-500 shrink-0" />
-            </div>
-            <div className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-neutral-900 cursor-pointer">
-              <span className="text-xs text-neutral-300 truncate">frist day problem</span>
-            </div>
-            <div className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-neutral-900 cursor-pointer">
-              <span className="text-xs text-neutral-300 truncate">3rd day problem</span>
-            </div>
-            <div className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-neutral-900 cursor-pointer">
-              <span className="text-xs text-neutral-300 truncate">Job search update</span>
-            </div>
-          </div>
-
-          {/* Dynamic Recent History Section */}
-          <div className="space-y-1 pt-2">
-            <span className="px-3 text-[10px] font-bold text-neutral-500 tracking-wider block mb-1">
-              Recents (Footprints)
-            </span>
-            {filteredHistory.length > 0 ? (
-              filteredHistory.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => loadHistoryItem(item)}
-                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-neutral-900 transition-all flex items-center gap-2.5 text-neutral-300 truncate active:scale-[0.98]"
-                >
-                  <MessageSquare className="h-3.5 w-3.5 text-neutral-500 shrink-0" />
-                  <span className="text-xs truncate">{item.topic || "Interaction"}</span>
-                </button>
-              ))
-            ) : (
-              <div className="px-3 py-4 text-center text-[10px] text-neutral-600">
-                No recent footprint logs.
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Clear All History Button */}
-        <div className="px-3.5 py-1.5 border-t border-neutral-900 bg-black">
-          <Button
-            onClick={clearAllHistory}
-            variant="ghost"
-            className="w-full justify-start gap-2 text-neutral-500 hover:text-rose-400 hover:bg-neutral-900 text-[11px] h-8 rounded-lg font-bold"
+          <button
+            onClick={() => triggerQuickAction("tutor")}
+            className="w-full flex items-center gap-3 px-3 py-2 text-neutral-400 hover:text-white hover:bg-neutral-900 rounded-lg text-xs font-semibold transition-all text-left"
           >
-            <Trash2 className="h-3.5 w-3.5" /> Clear All History
-          </Button>
+            <Cpu className="h-4 w-4 text-neutral-500" />
+            <span>AI Tutor Room</span>
+          </button>
+
+          <button className="w-full flex items-center gap-3 px-3 py-2 text-neutral-400 hover:text-white hover:bg-neutral-900 rounded-lg text-xs font-semibold transition-all text-left">
+            <MoreHorizontal className="h-4 w-4 text-neutral-500" />
+            <span>More</span>
+          </button>
         </div>
 
-        {/* Premium Profile Card matching mockup */}
-        <div className="p-3.5 border-t border-neutral-900 bg-black flex items-center justify-between gap-3">
+        {/* 📚 Pinned & Recents Logs (Scroll hidden) */}
+        <div className="flex-1 overflow-y-auto py-4 px-2 space-y-4 no-scrollbar bg-black">
+          {historyItems.length > 0 ? (
+            <>
+              {/* Pinned Section */}
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold text-neutral-500 px-3 uppercase tracking-wider block mb-2">
+                  Pinned
+                </span>
+                {historyItems.slice(0, 3).map((item, idx) => (
+                  <button
+                    key={item.id}
+                    onClick={() => loadHistoryItem(item)}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-neutral-300 hover:text-white hover:bg-neutral-900 transition-all text-left text-xs font-medium group"
+                  >
+                    <div className="flex items-center gap-2.5 overflow-hidden">
+                      <MessageSquare className="h-3.5 w-3.5 text-neutral-500 group-hover:text-white shrink-0" />
+                      <span className="truncate">{item.topic || "Admission Banner Design"}</span>
+                    </div>
+                    {idx === 0 && (
+                      <span className="h-2 w-2 rounded-full bg-blue-500 shadow-[0_0_6px_#3b82f6] shrink-0" />
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {/* Recents Section */}
+              {historyItems.length > 3 && (
+                <div className="space-y-1">
+                  <span className="text-[10px] font-bold text-neutral-500 px-3 uppercase tracking-wider block mb-2">
+                    Recents
+                  </span>
+                  {historyItems.slice(3).map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => loadHistoryItem(item)}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-900 transition-all text-left text-xs font-medium group"
+                    >
+                      <MessageSquare className="h-3.5 w-3.5 text-neutral-600 group-hover:text-white shrink-0" />
+                      <span className="truncate">{item.topic || "Previous Chat"}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-16 text-center text-neutral-600">
+              <HelpCircle className="h-7 w-7 mb-2 opacity-50" />
+              <span className="text-[11px] font-semibold text-neutral-500">No footprints yet.</span>
+            </div>
+          )}
+        </div>
+
+        {/* 👤 Himanshu Shakya User profile footer */}
+        <div className="flex items-center justify-between p-3 border-t border-[#1a1a1a] bg-black">
           <div className="flex items-center gap-3 overflow-hidden">
-            {/* Styled Avatar Placeholder */}
-            <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center font-bold text-neutral-950 text-xs shrink-0 select-none shadow">
+            <div className="h-8 w-8 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-xs font-black text-blue-400 shrink-0">
               HS
             </div>
             <div className="flex flex-col text-left overflow-hidden">
-              <span className="text-xs font-bold text-neutral-200 truncate">Himanshu Shakya</span>
-              <span className="text-[10px] text-neutral-500 font-semibold truncate leading-none mt-0.5">Go</span>
+              <span className="text-xs font-bold text-white truncate">Himanshu Shakya</span>
+              <span className="text-[10px] text-neutral-500">Go</span>
             </div>
           </div>
-          <button className="text-neutral-400 hover:text-white transition-colors cursor-pointer">
-            <Store className="h-4.5 w-4.5" />
+          <button
+            onClick={clearAllHistory}
+            title="Clear all database history logs"
+            className="text-neutral-500 hover:text-rose-400 p-1.5 hover:bg-neutral-900 rounded-lg transition-colors shrink-0"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
           </button>
         </div>
       </aside>
