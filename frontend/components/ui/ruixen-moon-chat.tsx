@@ -382,6 +382,10 @@ export default function RuixenMoonChat() {
     setAttachedFile(null);
   };
 
+  const deleteMessage = (id: string) => {
+    setMessages((prev) => prev.filter((msg) => msg.id !== id));
+  };
+
   return (
     <div className="flex h-screen w-full overflow-hidden bg-[#0a0f1d] text-white">
       {/* 📁 Clean History Sidebar */}
@@ -408,8 +412,8 @@ export default function RuixenMoonChat() {
           </Button>
         </div>
 
-        {/* History List */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-1 bg-[#0b0f19]">
+        {/* History List (Scroll hidden) */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-1 bg-[#0b0f19] no-scrollbar">
           {historyItems.length > 0 ? (
             historyItems.map((item) => (
               <button
@@ -464,6 +468,15 @@ export default function RuixenMoonChat() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[350px] w-[600px] rounded-full bg-gradient-to-b from-[#FFEF4D]/10 to-transparent blur-[120px] pointer-events-none" />
         <div className="absolute bottom-10 left-10 h-72 w-72 rounded-full bg-blue-500/5 blur-[100px] pointer-events-none" />
 
+        {/* Hidden file input */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          accept=".pdf,.txt"
+          className="hidden"
+        />
+
         {/* Header Panel */}
         <header className="relative w-full px-6 md:px-10 flex items-center justify-between p-4 z-10 border-b border-white/10 bg-[#0f172a]/40 backdrop-blur-md">
           <div className="flex items-center gap-3">
@@ -508,8 +521,8 @@ export default function RuixenMoonChat() {
           )}
         </header>
 
-        {/* Scrollable Conversation Workspace */}
-        <div className="flex-1 w-full max-w-3xl overflow-y-auto px-4 py-8 space-y-8 z-10">
+        {/* Scrollable Conversation Workspace (Scroll hidden) */}
+        <div className="flex-1 w-full max-w-3xl overflow-y-auto px-4 py-8 space-y-8 z-10 no-scrollbar">
           {messages.length === 0 && (
             <div className="h-full flex flex-col items-center justify-center text-center px-4">
               <div className="h-14 w-14 rounded-2xl bg-[#1e293b]/60 border border-white/10 flex items-center justify-center mb-6 shadow-md">
@@ -534,14 +547,23 @@ export default function RuixenMoonChat() {
             >
               {/* Clean User Message */}
               {msg.isUser && (
-                <div className="max-w-[75%] rounded-2xl bg-[#1e293b] border border-white/10 text-white px-4 py-2.5 font-semibold text-sm rounded-br-none shadow-md">
-                  {msg.text}
+                <div className="group relative max-w-[75%] flex items-center gap-2">
+                  <button
+                    onClick={() => deleteMessage(msg.id)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 text-neutral-500 hover:text-rose-400 shrink-0"
+                    title="Delete message"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                  <div className="rounded-2xl bg-[#1e293b] border border-white/10 text-white px-4 py-2.5 font-semibold text-sm rounded-br-none shadow-md">
+                    {msg.text}
+                  </div>
                 </div>
               )}
 
               {/* Clean AI Widgets */}
               {!msg.isUser && (
-                <div className="w-full max-w-[90%] flex gap-4 items-start">
+                <div className="group relative w-full max-w-[90%] flex gap-4 items-start">
                   {/* AI Avatar badge */}
                   <div className="h-8 w-8 rounded-lg bg-[#FFEF4D]/10 border border-[#FFEF4D]/20 flex items-center justify-center shrink-0 mt-0.5 shadow-[0_0_8px_rgba(255,239,77,0.05)]">
                     <Sparkles className="h-4 w-4 text-[#FFEF4D]" />
@@ -676,6 +698,15 @@ export default function RuixenMoonChat() {
                       />
                     )}
                   </div>
+
+                  {/* Clean Hover Delete Button */}
+                  <button
+                    onClick={() => deleteMessage(msg.id)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-neutral-500 hover:text-rose-400 shrink-0 self-center"
+                    title="Delete message"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
                 </div>
               )}
             </div>
