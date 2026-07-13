@@ -6,17 +6,6 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { marked } from "marked";
 import {
-  ImageIcon,
-  FileUp,
-  MonitorIcon,
-  CircleUserRound,
-  ArrowUpIcon,
-  Paperclip,
-  PlusIcon,
-  Code2,
-  Palette,
-  Layers,
-  Rocket,
   Compass,
   FileText,
   HelpCircle,
@@ -25,10 +14,6 @@ import {
   X,
   Sparkles,
   Printer,
-  CheckCircle,
-  XCircle,
-  Trophy,
-  Star,
   Check,
   ChevronRight,
   PanelLeftClose,
@@ -36,7 +21,9 @@ import {
   Trash2,
   History,
   MessageSquare,
-  LogOut,
+  ArrowUp,
+  Paperclip,
+  Trophy,
 } from "lucide-react";
 
 interface AutoResizeProps {
@@ -78,11 +65,10 @@ interface Message {
   id: string;
   type: "text" | "notes" | "quiz" | "pathfinder";
   text: string;
-  data?: any; // Payload for quiz or notes metadata
+  data?: any;
   isUser: boolean;
 }
 
-// Custom parser to map roadmap markdown to an interactive timeline component
 function parseRoadmapSteps(markdownText: string) {
   const steps: { title: string; content: string[] }[] = [];
   const lines = markdownText.split("\n");
@@ -397,41 +383,41 @@ export default function RuixenMoonChat() {
   };
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#020617] text-white">
-      {/* 📁 History Sidebar */}
+    <div className="flex h-screen w-full overflow-hidden bg-[#030712] text-white">
+      {/* 📁 Clean History Sidebar */}
       <aside
         className={cn(
-          "flex flex-col border-r border-white/5 bg-[#0f172a]/95 backdrop-blur-md transition-all duration-300 relative z-20 h-full",
+          "flex flex-col border-r border-white/[0.04] bg-[#090d16] transition-all duration-300 relative z-20 h-full",
           isSidebarOpen ? "w-72" : "w-0 overflow-hidden border-r-0"
         )}
       >
-        <div className="flex items-center justify-between p-5 border-b border-white/5">
+        <div className="flex items-center justify-between p-5 border-b border-white/[0.04]">
           <div className="flex items-center gap-2">
-            <History className="h-4.5 w-4.5 text-[#FFEF4D]" />
-            <span className="text-xs font-black tracking-widest text-[#FFEF4D] uppercase">
-              Academic Footprint
+            <History className="h-4 w-4 text-neutral-400" />
+            <span className="text-[11px] font-black tracking-widest text-neutral-400 uppercase">
+              Footprint History
             </span>
           </div>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setIsSidebarOpen(false)}
-            className="h-8 w-8 text-neutral-400 hover:text-white rounded-lg"
+            className="h-8 w-8 text-neutral-400 hover:text-white hover:bg-white/5 rounded-lg"
           >
             <PanelLeftClose className="h-4 w-4" />
           </Button>
         </div>
 
         {/* History List */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-2">
+        <div className="flex-1 overflow-y-auto p-3 space-y-1">
           {historyItems.length > 0 ? (
             historyItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => loadHistoryItem(item)}
-                className="w-full text-left p-3 rounded-xl border border-white/5 bg-black/20 hover:bg-white/5 transition-all flex items-start gap-3 group active:scale-[0.98]"
+                className="w-full text-left p-2.5 rounded-xl border border-transparent hover:border-white/[0.04] hover:bg-white/[0.02] transition-all flex items-start gap-3 group active:scale-[0.98]"
               >
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/5 text-[#FFEF4D] group-hover:scale-105 transition-transform shrink-0 mt-0.5">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/[0.03] text-neutral-400 group-hover:text-[#FFEF4D] transition-colors shrink-0 mt-0.5">
                   {item.type === "chat" ? (
                     <MessageSquare className="h-3.5 w-3.5" />
                   ) : item.type === "notes" ? (
@@ -443,86 +429,67 @@ export default function RuixenMoonChat() {
                   )}
                 </div>
                 <div className="overflow-hidden">
-                  <span className="inline-block text-[9px] uppercase font-black tracking-widest text-[#FFEF4D] mb-0.5 opacity-80">
+                  <span className="inline-block text-[9px] uppercase font-bold tracking-wider text-neutral-500 mb-0.5">
                     {item.type}
                   </span>
-                  <p className="text-xs font-bold text-neutral-200 truncate group-hover:text-white transition-colors">
-                    {item.topic || "Interaction Sequence"}
+                  <p className="text-xs font-semibold text-neutral-300 truncate group-hover:text-white transition-colors">
+                    {item.topic || "Interaction"}
                   </p>
                 </div>
               </button>
             ))
           ) : (
-            <div className="flex flex-col items-center justify-center py-20 text-center text-neutral-500">
-              <HelpCircle className="h-8 w-8 mb-2 opacity-50" />
-              <span className="text-xs font-bold">No footprint logged.</span>
+            <div className="flex flex-col items-center justify-center py-20 text-center text-neutral-600">
+              <HelpCircle className="h-7 w-7 mb-2 opacity-50" />
+              <span className="text-[11px] font-semibold">No footprints yet.</span>
             </div>
           )}
         </div>
 
         {/* Sidebar Footer Controls */}
-        <div className="p-4 border-t border-white/5">
+        <div className="p-4 border-t border-white/[0.04]">
           <Button
             onClick={clearChat}
             variant="outline"
-            className="w-full justify-start gap-2 border-white/10 hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/30 text-xs h-10 rounded-xl"
+            className="w-full justify-start gap-2 border-white/[0.06] bg-[#030712] hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/20 text-xs h-9 rounded-xl font-bold"
           >
-            <Trash2 className="h-4 w-4" /> Clear Chat Console
+            <Trash2 className="h-3.5 w-3.5" /> Clear Console
           </Button>
         </div>
       </aside>
 
       {/* 🌌 Main Chat Window Area */}
-      <div
-        className="flex-1 h-screen flex flex-col items-center overflow-hidden relative"
-        style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=1920&q=80')",
-          backgroundAttachment: "fixed",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="absolute inset-0 bg-[#020617]/75 pointer-events-none" />
-
-        {/* Ambient drifting neon light filters */}
-        <div className="absolute top-1/4 left-1/4 h-96 w-96 rounded-full bg-[#FFEF4D]/5 blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-blue-500/5 blur-[120px] pointer-events-none" />
-
-        {/* Hidden file input */}
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          accept=".pdf,.txt"
-          className="hidden"
-        />
+      <div className="flex-1 h-screen flex flex-col items-center overflow-hidden relative bg-[#030712]">
+        {/* Subtle Ambient Light Filters (Clean UI style) */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[350px] w-[600px] rounded-full bg-gradient-to-b from-[#FFEF4D]/5 to-transparent blur-[120px] pointer-events-none" />
 
         {/* Header Panel */}
-        <header className="relative w-full max-w-5xl flex items-center justify-between p-4 z-10 border-b border-white/5 bg-[#0f172a]/20 backdrop-blur-md">
+        <header className="relative w-full max-w-5xl flex items-center justify-between p-4 z-10 border-b border-white/[0.04]">
           <div className="flex items-center gap-3">
             {!isSidebarOpen && (
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsSidebarOpen(true)}
-                className="h-9 w-9 text-neutral-400 hover:text-white rounded-lg animate-in fade-in"
+                className="h-9 w-9 text-neutral-400 hover:text-white hover:bg-white/5 rounded-lg"
               >
-                <PanelLeft className="h-5 w-5" />
+                <PanelLeft className="h-4.5 w-4.5" />
               </Button>
             )}
-            <Cpu className="h-6 w-6 text-[#FFEF4D] drop-shadow-[0_0_8px_rgba(255,239,77,0.45)]" />
-            <span className="font-bold tracking-tight text-white">CourseMate AI Console</span>
+            <div className="flex items-center gap-2">
+              <Cpu className="h-5 w-5 text-[#FFEF4D]" />
+              <span className="font-bold text-sm tracking-tight text-white">CourseMate AI</span>
+            </div>
           </div>
 
           {/* Notes Context mode indicator */}
           {hasDocument && (
-            <div className="flex bg-black/60 border border-white/10 rounded-xl p-1 text-[11px] font-bold">
+            <div className="flex bg-[#090d16] border border-white/[0.06] rounded-xl p-1 text-[11px] font-bold">
               <button
                 onClick={() => setChatMode("general")}
                 className={cn(
                   "px-2.5 py-1 rounded-lg transition-colors",
-                  chatMode === "general" ? "bg-[#FFEF4D] text-[#020617]" : "text-neutral-400"
+                  chatMode === "general" ? "bg-white text-[#030712]" : "text-neutral-400 hover:text-white"
                 )}
               >
                 🤖 Tutor
@@ -531,7 +498,7 @@ export default function RuixenMoonChat() {
                 onClick={() => setChatMode("notes")}
                 className={cn(
                   "px-2.5 py-1 rounded-lg transition-colors",
-                  chatMode === "notes" ? "bg-[#FFEF4D] text-[#020617]" : "text-neutral-400"
+                  chatMode === "notes" ? "bg-white text-[#030712]" : "text-neutral-400 hover:text-white"
                 )}
               >
                 📄 Notes: {documentTopic}
@@ -541,17 +508,17 @@ export default function RuixenMoonChat() {
         </header>
 
         {/* Scrollable Conversation Workspace */}
-        <div className="relative flex-1 w-full max-w-4xl overflow-y-auto px-6 py-8 space-y-8 z-10">
+        <div className="flex-1 w-full max-w-3xl overflow-y-auto px-4 py-8 space-y-8 z-10">
           {messages.length === 0 && (
-            <div className="h-full flex flex-col items-center justify-center text-center">
-              <div className="bg-[#1e293b]/30 p-8 rounded-full border border-white/5 backdrop-blur-sm mb-6 drop-shadow-[0_0_15px_rgba(255,239,77,0.05)]">
-                <Cpu className="h-16 w-16 text-[#FFEF4D] drop-shadow-[0_0_12px_rgba(255,239,77,0.5)] animate-pulse" />
+            <div className="h-full flex flex-col items-center justify-center text-center px-4">
+              <div className="h-12 w-12 rounded-2xl bg-white/[0.03] border border-white/[0.04] flex items-center justify-center mb-6">
+                <Cpu className="h-6 w-6 text-[#FFEF4D] animate-pulse" />
               </div>
-              <h1 className="text-5xl font-extrabold tracking-tight text-white drop-shadow-md">
-                CourseMate AI
+              <h1 className="text-4xl font-extrabold tracking-tight text-white">
+                How can I assist you today?
               </h1>
-              <p className="mt-3 text-neutral-300 text-lg max-w-md mx-auto">
-                Your unified learning copilot. Choose an action or start typing.
+              <p className="mt-2 text-neutral-400 text-sm max-w-md mx-auto">
+                Synthesize study guides, take interactive quizzes, or map out your career paths inline.
               </p>
             </div>
           )}
@@ -560,203 +527,203 @@ export default function RuixenMoonChat() {
             <div
               key={msg.id}
               className={cn(
-                "flex w-full flex-col animate-in fade-in slide-in-from-bottom-4 duration-300",
+                "flex w-full flex-col animate-in fade-in slide-in-from-bottom-3 duration-200",
                 msg.isUser ? "items-end" : "items-start"
               )}
             >
-              {/* User Speech Bubble */}
+              {/* Clean User Message */}
               {msg.isUser && (
-                <div className="max-w-[80%] rounded-2xl bg-[#FFEF4D] text-[#020617] px-4 py-3 font-semibold text-sm shadow-lg rounded-br-none border border-[#FFEF4D]/10">
+                <div className="max-w-[75%] rounded-2xl bg-white/[0.04] border border-white/[0.06] text-white px-4 py-2.5 font-medium text-sm rounded-br-none shadow-sm">
                   {msg.text}
                 </div>
               )}
 
-              {/* AI Rendered Widgets */}
+              {/* Clean AI Widgets */}
               {!msg.isUser && (
-                <div className="w-full max-w-[90%]">
-                  {/* 📄 Upgraded Cyber-Notes Card */}
-                  {msg.type === "notes" && (
-                    <div className="bg-[#0f172a]/90 backdrop-blur-lg border border-[#FFEF4D]/20 p-8 rounded-3xl shadow-2xl mb-4 text-neutral-100 relative overflow-hidden">
-                      <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-transparent via-[#FFEF4D] to-transparent opacity-80" />
-                      
-                      <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
-                        <h3 className="font-bold text-lg flex items-center gap-2 text-[#FFEF4D] tracking-wide">
-                          <FileText className="h-5 w-5 text-[#FFEF4D] drop-shadow-[0_0_8px_rgba(255,239,77,0.45)]" />
-                          {msg.data?.topic || "Study Guide"} Manuscript
-                        </h3>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => window.print()}
-                          className="flex items-center gap-1.5 h-8 border-white/10 hover:bg-white/5 text-xs text-[#FFEF4D]"
-                        >
-                          <Printer className="h-3.5 w-3.5" /> Print / PDF
-                        </Button>
-                      </div>
-                      <div
-                        className="prose prose-invert prose-sm max-w-none text-sm leading-relaxed prose-headings:text-white prose-strong:text-[#FFEF4D] prose-code:bg-white/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded"
-                        dangerouslySetInnerHTML={{ __html: marked.parse(msg.text) }}
-                      />
-                    </div>
-                  )}
-
-                  {/* ⚡ Upgraded Interactive Quiz Widget */}
-                  {msg.type === "quiz" && msg.data?.quiz && (
-                    <div className="bg-[#0f172a]/95 backdrop-blur-md border border-white/10 p-6 rounded-3xl shadow-xl w-full">
-                      <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-6">
-                        <span className="text-xs font-black tracking-widest text-[#FFEF4D] uppercase flex items-center gap-1.5">
-                          <Brain className="h-4 w-4 text-[#FFEF4D]" /> Interactive Quiz
-                        </span>
-                        <span className="text-[10px] text-neutral-400 font-bold uppercase bg-white/5 px-2.5 py-1 rounded-lg">
-                          Score: {Object.keys(msg.data.answers).filter(k => msg.data.answers[Number(k)] === msg.data.quiz[Number(k)].answer).length} / {msg.data.quiz.length}
-                        </span>
-                      </div>
-
-                      <div className="space-y-6">
-                        {msg.data.quiz.map((q: any, qIdx: number) => {
-                          const selectedOption = msg.data.answers[qIdx];
-                          return (
-                            <div key={qIdx} className="space-y-3">
-                              <p className="text-xs font-semibold text-white leading-relaxed">
-                                0{qIdx + 1}. {q.question}
-                              </p>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                                {q.options.map((opt: string) => {
-                                  const selected = selectedOption === opt;
-                                  const isCorrect = q.answer === opt;
-                                  return (
-                                    <button
-                                      key={opt}
-                                      onClick={() => handleQuizAnswer(msg.id, qIdx, opt)}
-                                      className={cn(
-                                        "text-left p-3 rounded-xl text-xs font-medium transition-all border outline-none",
-                                        selectedOption === undefined
-                                          ? "bg-black/30 border-white/5 hover:border-[#FFEF4D] hover:bg-white/5 active:scale-[0.98]"
-                                          : isCorrect
-                                          ? "bg-emerald-500/10 border-emerald-500 text-emerald-400 font-bold shadow-[0_0_10px_rgba(16,185,129,0.1)]"
-                                          : selected
-                                          ? "bg-rose-500/10 border-rose-500 text-rose-400"
-                                          : "bg-black/10 border-white/5 text-neutral-500 cursor-not-allowed"
-                                      )}
-                                    >
-                                      <span className="flex justify-between items-center">
-                                        <span>{opt}</span>
-                                        {selectedOption !== undefined && isCorrect && <Check className="h-3.5 w-3.5 text-emerald-400 shrink-0" />}
-                                        {selectedOption !== undefined && selected && !isCorrect && <X className="h-3.5 w-3.5 text-rose-400 shrink-0" />}
-                                      </span>
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-
-                      {/* Quiz Complete Celebration Widget */}
-                      {Object.keys(msg.data.answers).length === msg.data.quiz.length && (
-                        <div className="mt-8 pt-6 border-t border-white/10 flex flex-col items-center text-center animate-in zoom-in-95 duration-300">
-                          <Trophy className="h-10 w-10 text-[#FFEF4D] mb-3 drop-shadow-[0_0_8px_rgba(255,239,77,0.45)]" />
-                          <span className="text-sm font-bold text-white mb-1">Evaluation Complete!</span>
-                          <p className="text-xs text-neutral-400">
-                            {Object.keys(msg.data.answers).filter(k => msg.data.answers[Number(k)] === msg.data.quiz[Number(k)].answer).length === msg.data.quiz.length
-                              ? "Perfect Score! You've mastered this topic. 🏆"
-                              : "Good job! Review incorrect responses to lock in the knowledge. 📚"}
-                          </p>
+                <div className="w-full max-w-[90%] flex gap-4 items-start">
+                  {/* AI Avatar badge */}
+                  <div className="h-8 w-8 rounded-lg bg-[#FFEF4D]/10 border border-[#FFEF4D]/20 flex items-center justify-center shrink-0 mt-0.5 shadow-[0_0_8px_rgba(255,239,77,0.05)]">
+                    <Sparkles className="h-4 w-4 text-[#FFEF4D]" />
+                  </div>
+                  
+                  <div className="flex-1 space-y-3 overflow-hidden">
+                    {/* Notes (Clean Card) */}
+                    {msg.type === "notes" && (
+                      <div className="bg-[#090d16] border border-white/[0.06] p-6 rounded-2xl shadow-xl w-full">
+                        <div className="flex items-center justify-between border-b border-white/[0.04] pb-3 mb-4">
+                          <span className="text-xs font-bold text-[#FFEF4D] uppercase flex items-center gap-1.5">
+                            <FileText className="h-3.5 w-3.5" /> Study Notes
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => window.print()}
+                            className="flex items-center gap-1 h-7 border border-white/[0.06] hover:bg-white/5 text-[10px] text-neutral-300 font-bold px-2 rounded-lg"
+                          >
+                            <Printer className="h-3 w-3" /> Print / PDF
+                          </Button>
                         </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* 🧭 Upgraded Pathfinder Interactive Timeline */}
-                  {msg.type === "pathfinder" && (
-                    <div className="bg-[#0f172a]/95 border border-white/10 p-6 rounded-3xl shadow-xl w-full">
-                      <div className="flex items-center gap-2 border-b border-white/10 pb-3 mb-6">
-                        <Compass className="h-5 w-5 text-[#FFEF4D]" />
-                        <span className="text-xs font-black tracking-widest text-[#FFEF4D] uppercase">
-                          Career Path Roadmap
-                        </span>
-                      </div>
-
-                      {parseRoadmapSteps(msg.text).length > 0 ? (
-                        <div className="relative border-l-2 border-[#FFEF4D]/30 ml-3.5 pl-6 space-y-6">
-                          {parseRoadmapSteps(msg.text).map((step, idx) => (
-                            <div key={idx} className="relative">
-                              <span className="absolute -left-[35px] top-1.5 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-[#020617] border-2 border-[#FFEF4D] text-[#FFEF4D] text-[9px] font-bold">
-                                {idx + 1}
-                              </span>
-                              <h4 className="text-sm font-bold text-white">{step.title}</h4>
-                              <ul className="mt-2 space-y-1">
-                                {step.content.map((item, itemIdx) => (
-                                  <li key={itemIdx} className="text-xs text-neutral-300 flex items-start gap-1.5">
-                                    <ChevronRight className="h-3 w-3 text-[#FFEF4D] mt-0.5 shrink-0" />
-                                    <span>{item}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
                         <div
-                          className="prose prose-invert prose-sm max-w-none text-xs leading-relaxed"
+                          className="prose prose-invert prose-xs max-w-none text-neutral-300 leading-relaxed prose-headings:text-white prose-strong:text-white prose-code:bg-white/5 prose-code:p-0.5 prose-code:rounded prose-ul:list-disc prose-ol:list-decimal"
                           dangerouslySetInnerHTML={{ __html: marked.parse(msg.text) }}
                         />
-                      )}
-                    </div>
-                  )}
+                      </div>
+                    )}
 
-                  {/* Standard Text Bubble */}
-                  {msg.type === "text" && (
-                    <div
-                      className="prose prose-invert max-w-none text-sm leading-relaxed bg-[#1e293b]/80 border border-white/5 px-4 py-3 rounded-2xl rounded-bl-none border-l-4 border-l-[#FFEF4D] shadow-md"
-                      dangerouslySetInnerHTML={{ __html: marked.parse(msg.text) }}
-                    />
-                  )}
+                    {/* Quiz (Clean Card) */}
+                    {msg.type === "quiz" && msg.data?.quiz && (
+                      <div className="bg-[#090d16] border border-white/[0.06] p-6 rounded-2xl shadow-xl w-full">
+                        <div className="flex items-center justify-between border-b border-white/[0.04] pb-3 mb-4">
+                          <span className="text-xs font-bold text-[#FFEF4D] uppercase flex items-center gap-1.5">
+                            <Brain className="h-3.5 w-3.5" /> Interactive Quiz
+                          </span>
+                          <span className="text-[10px] text-neutral-400 font-bold bg-white/5 px-2.5 py-0.5 rounded-md">
+                            Score: {Object.keys(msg.data.answers).filter(k => msg.data.answers[Number(k)] === msg.data.quiz[Number(k)].answer).length} / {msg.data.quiz.length}
+                          </span>
+                        </div>
+
+                        <div className="space-y-5">
+                          {msg.data.quiz.map((q: any, qIdx: number) => {
+                            const selectedOption = msg.data.answers[qIdx];
+                            return (
+                              <div key={qIdx} className="space-y-2">
+                                <p className="text-xs font-bold text-neutral-200">
+                                  0{qIdx + 1}. {q.question}
+                                </p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                  {q.options.map((opt: string) => {
+                                    const selected = selectedOption === opt;
+                                    const isCorrect = q.answer === opt;
+                                    return (
+                                      <button
+                                        key={opt}
+                                        onClick={() => handleQuizAnswer(msg.id, qIdx, opt)}
+                                        className={cn(
+                                          "text-left p-2.5 rounded-lg text-xs transition-all border outline-none font-semibold",
+                                          selectedOption === undefined
+                                            ? "bg-[#030712] border-white/[0.04] hover:border-neutral-500 hover:bg-white/[0.02]"
+                                            : isCorrect
+                                            ? "bg-emerald-500/10 border-emerald-500 text-emerald-400"
+                                            : selected
+                                            ? "bg-rose-500/10 border-rose-500 text-rose-400"
+                                            : "bg-[#030712] border-white/[0.02] text-neutral-500 cursor-not-allowed"
+                                        )}
+                                      >
+                                        <span>{opt}</span>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* Complete Celebration */}
+                        {Object.keys(msg.data.answers).length === msg.data.quiz.length && (
+                          <div className="mt-6 pt-4 border-t border-white/[0.04] flex items-center justify-center gap-2 text-center text-xs font-bold text-[#FFEF4D]">
+                            <Trophy className="h-4 w-4" />
+                            <span>Evaluation Complete! Good Work.</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Pathfinder (Clean Card) */}
+                    {msg.type === "pathfinder" && (
+                      <div className="bg-[#090d16] border border-white/[0.06] p-6 rounded-2xl shadow-xl w-full">
+                        <div className="flex items-center gap-1.5 border-b border-white/[0.04] pb-3 mb-4">
+                          <Compass className="h-4 w-4 text-[#FFEF4D]" />
+                          <span className="text-xs font-bold text-[#FFEF4D] uppercase">
+                            Career Pathway
+                          </span>
+                        </div>
+
+                        {parseRoadmapSteps(msg.text).length > 0 ? (
+                          <div className="relative border-l border-white/[0.08] ml-2 pl-5 space-y-5">
+                            {parseRoadmapSteps(msg.text).map((step, idx) => (
+                              <div key={idx} className="relative">
+                                <span className="absolute -left-[25px] top-1 flex h-3 w-3 items-center justify-center rounded-full bg-[#030712] border border-[#FFEF4D] text-[8px] font-black text-[#FFEF4D]">
+                                  {idx + 1}
+                                </span>
+                                <h4 className="text-xs font-bold text-white">{step.title}</h4>
+                                <ul className="mt-1 space-y-0.5">
+                                  {step.content.map((item, itemIdx) => (
+                                    <li key={itemIdx} className="text-[11px] text-neutral-400 flex items-start gap-1">
+                                      <ChevronRight className="h-3 w-3 text-neutral-600 mt-0.5 shrink-0" />
+                                      <span>{item}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div
+                            className="prose prose-invert prose-sm max-w-none text-xs text-neutral-300"
+                            dangerouslySetInnerHTML={{ __html: marked.parse(msg.text) }}
+                          />
+                        )}
+                      </div>
+                    )}
+
+                    {/* Standard Text Bubble */}
+                    {msg.type === "text" && (
+                      <div
+                        className="prose prose-invert max-w-none text-sm text-neutral-200 leading-relaxed"
+                        dangerouslySetInnerHTML={{ __html: marked.parse(msg.text) }}
+                      />
+                    )}
+                  </div>
                 </div>
               )}
             </div>
           ))}
 
           {isLoading && (
-            <div className="self-start flex gap-1 items-center bg-[#1e293b]/80 border border-white/5 border-l-4 border-l-[#FFEF4D] rounded-2xl rounded-bl-none px-4 py-3">
-              <span className="h-2.5 w-2.5 rounded-full bg-[#FFEF4D] animate-bounce [animation-delay:-0.3s]" />
-              <span className="h-2.5 w-2.5 rounded-full bg-[#FFEF4D] animate-bounce [animation-delay:-0.15s]" />
-              <span className="h-2.5 w-2.5 rounded-full bg-[#FFEF4D] animate-bounce" />
+            <div className="self-start flex gap-4 items-start w-full">
+              <div className="h-8 w-8 rounded-lg bg-[#FFEF4D]/10 border border-[#FFEF4D]/20 flex items-center justify-center shrink-0 shadow-[0_0_8px_rgba(255,239,77,0.05)]">
+                <Sparkles className="h-4 w-4 text-[#FFEF4D] animate-spin" />
+              </div>
+              <div className="flex gap-1 items-center pt-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-neutral-600 animate-bounce [animation-delay:-0.3s]" />
+                <span className="h-1.5 w-1.5 rounded-full bg-neutral-600 animate-bounce [animation-delay:-0.15s]" />
+                <span className="h-1.5 w-1.5 rounded-full bg-neutral-600 animate-bounce" />
+              </div>
             </div>
           )}
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input console */}
-        <div className="relative w-full max-w-3xl mb-8 px-4 z-10">
-          {/* Dynamic active flow hint */}
+        {/* Input Console */}
+        <div className="relative w-full max-w-2xl mb-8 px-4 z-10">
+          {/* Active Flow HUD Bar */}
           {currentFlow !== "general" && (
-            <div className="flex items-center justify-between bg-[#FFEF4D]/10 border border-[#FFEF4D]/20 px-4 py-2 rounded-t-xl text-xs font-semibold text-[#FFEF4D] mb-[-1px] animate-in slide-in-from-bottom-2">
+            <div className="flex items-center justify-between bg-[#FFEF4D]/5 border border-[#FFEF4D]/10 px-4 py-2 rounded-t-xl text-[10px] font-bold text-[#FFEF4D] mb-[-1px] animate-in slide-in-from-bottom-2">
               <span className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                Flow engaged: <strong className="uppercase">{currentFlow.replace("-generation", "")}</strong>
+                <span className="h-1.5 w-1.5 rounded-full bg-[#FFEF4D] animate-pulse" />
+                ACTIVE INTERACTIVE FLOW: <strong className="uppercase">{currentFlow.replace("-generation", "")}</strong>
               </span>
               <button
                 onClick={() => {
                   setCurrentFlow("general");
                   setAttachedFile(null);
                 }}
-                className="text-neutral-400 hover:text-white"
+                className="text-neutral-500 hover:text-white"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
             </div>
           )}
 
-          <div className="bg-[#0f172a]/90 backdrop-blur-md rounded-2xl border border-neutral-700 shadow-2xl overflow-hidden focus-within:border-[#FFEF4D]/50 focus-within:ring-2 focus-within:ring-[#FFEF4D]/10 transition-all">
-            {/* File Attachment Pill */}
+          <div className="bg-[#090d16] rounded-2xl border border-white/[0.04] shadow-xl overflow-hidden focus-within:border-white/10 transition-colors">
+            {/* Attached file tag */}
             {attachedFile && (
-              <div className="flex items-center justify-between bg-[#1e293b]/60 px-4 py-2 border-b border-neutral-800 text-xs">
-                <span className="text-[#FFEF4D] font-semibold truncate max-w-xs">
+              <div className="flex items-center justify-between bg-white/[0.02] px-4 py-2 border-b border-white/[0.04] text-[11px]">
+                <span className="text-[#FFEF4D] font-bold truncate max-w-xs">
                   📄 {attachedFile.name}
                 </span>
-                <button onClick={() => setAttachedFile(null)} className="text-neutral-400 hover:text-white">
+                <button onClick={() => setAttachedFile(null)} className="text-neutral-500 hover:text-white">
                   <X className="h-3.5 w-3.5" />
                 </button>
               </div>
@@ -772,27 +739,27 @@ export default function RuixenMoonChat() {
               onKeyDown={handleKeyDown}
               placeholder={
                 currentFlow === "notes-generation"
-                  ? "Enter subject matter details..."
+                  ? "Describe notes subject..."
                   : currentFlow === "quiz-generation"
-                  ? "Enter quiz topic..."
+                  ? "Describe quiz subject..."
                   : currentFlow === "pathfinder-generation"
-                  ? "Enter career goal or core interests..."
+                  ? "Describe career roadmap details..."
                   : "Type your query here..."
               }
               className={cn(
-                "w-full px-4 py-3 resize-none border-none bg-transparent text-white text-sm focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-neutral-500 min-h-[48px]"
+                "w-full px-4 py-3.5 resize-none border-none bg-transparent text-white text-sm focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-neutral-600 min-h-[48px]"
               )}
               style={{ overflow: "hidden" }}
             />
 
-            {/* Footer controls */}
-            <div className="flex items-center justify-between px-3 pb-3">
+            {/* Footer buttons */}
+            <div className="flex items-center justify-between px-3 pb-3 border-t border-white/[0.02] pt-2">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => fileInputRef.current?.click()}
-                className="text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg h-9 w-9"
-                title="Attach File Source"
+                className="text-neutral-500 hover:text-white hover:bg-white/5 rounded-lg h-8 w-8"
+                title="Attach Source Document"
               >
                 <Paperclip className="w-4 h-4" />
               </Button>
@@ -802,54 +769,54 @@ export default function RuixenMoonChat() {
                   onClick={handleSend}
                   disabled={!message.trim() && !attachedFile}
                   className={cn(
-                    "flex items-center gap-1.5 px-4 py-2 rounded-lg transition-all text-xs h-9 font-bold",
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all text-xs font-bold h-8",
                     (message.trim() || attachedFile)
-                      ? "bg-[#FFEF4D] text-[#020617] hover:bg-[#fff37a] hover:scale-[1.03] active:scale-[0.97] shadow-lg shadow-[#FFEF4D]/10"
-                      : "bg-neutral-800 text-neutral-500 cursor-not-allowed"
+                      ? "bg-white text-black hover:bg-neutral-200 active:scale-[0.98]"
+                      : "bg-white/5 text-neutral-600 cursor-not-allowed"
                   )}
                 >
-                  <ArrowUpIcon className="w-4 h-4" />
+                  <ArrowUp className="w-3.5 h-3.5" />
                   <span>Send</span>
                 </Button>
               </div>
             </div>
           </div>
 
-          {/* Quick Action Navigation pills */}
-          <div className="flex items-center justify-center flex-wrap gap-2.5 mt-5">
+          {/* Quick actions bar */}
+          <div className="flex items-center justify-center flex-wrap gap-2 mt-5">
             <Button
               variant="outline"
               onClick={() => triggerQuickAction("notes")}
-              className="flex items-center gap-1.5 rounded-full border-neutral-600 bg-black/50 text-neutral-300 hover:text-white hover:bg-neutral-850 hover:border-[#FFEF4D] transition-all text-[11px] h-8 px-3.5 hover:-translate-y-0.5 active:translate-y-0"
+              className="flex items-center gap-1.5 rounded-full border-white/[0.04] bg-white/[0.02] text-neutral-400 hover:text-white hover:bg-white/[0.04] transition-all text-[10px] h-7.5 px-3 font-semibold"
             >
-              <FileText className="w-3.5 h-3.5 text-[#FFEF4D]" />
-              <span>Study Notes</span>
+              <FileText className="w-3 h-3 text-[#FFEF4D]" />
+              <span>Notes Generator</span>
             </Button>
 
             <Button
               variant="outline"
               onClick={() => triggerQuickAction("tutor")}
-              className="flex items-center gap-1.5 rounded-full border-neutral-600 bg-black/50 text-neutral-300 hover:text-white hover:bg-neutral-850 hover:border-[#FFEF4D] transition-all text-[11px] h-8 px-3.5 hover:-translate-y-0.5 active:translate-y-0"
+              className="flex items-center gap-1.5 rounded-full border-white/[0.04] bg-white/[0.02] text-neutral-400 hover:text-white hover:bg-white/[0.04] transition-all text-[10px] h-7.5 px-3 font-semibold"
             >
-              <Cpu className="w-3.5 h-3.5 text-[#FFEF4D]" />
+              <Cpu className="w-3 h-3 text-[#FFEF4D]" />
               <span>AI Tutor</span>
             </Button>
 
             <Button
               variant="outline"
               onClick={() => triggerQuickAction("quiz")}
-              className="flex items-center gap-1.5 rounded-full border-neutral-600 bg-black/50 text-neutral-300 hover:text-white hover:bg-neutral-850 hover:border-[#FFEF4D] transition-all text-[11px] h-8 px-3.5 hover:-translate-y-0.5 active:translate-y-0"
+              className="flex items-center gap-1.5 rounded-full border-white/[0.04] bg-white/[0.02] text-neutral-400 hover:text-white hover:bg-white/[0.04] transition-all text-[10px] h-7.5 px-3 font-semibold"
             >
-              <Brain className="w-3.5 h-3.5 text-[#FFEF4D]" />
+              <Brain className="w-3 h-3 text-[#FFEF4D]" />
               <span>Quiz Lab</span>
             </Button>
 
             <Button
               variant="outline"
               onClick={() => triggerQuickAction("pathfinder")}
-              className="flex items-center gap-1.5 rounded-full border-neutral-600 bg-black/50 text-neutral-300 hover:text-white hover:bg-neutral-850 hover:border-[#FFEF4D] transition-all text-[11px] h-8 px-3.5 hover:-translate-y-0.5 active:translate-y-0"
+              className="flex items-center gap-1.5 rounded-full border-white/[0.04] bg-white/[0.02] text-neutral-400 hover:text-white hover:bg-white/[0.04] transition-all text-[10px] h-7.5 px-3 font-semibold"
             >
-              <Compass className="w-3.5 h-3.5 text-[#FFEF4D]" />
+              <Compass className="w-3 h-3 text-[#FFEF4D]" />
               <span>Pathfinder</span>
             </Button>
           </div>
