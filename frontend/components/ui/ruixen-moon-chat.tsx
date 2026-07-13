@@ -152,7 +152,12 @@ export default function RuixenMoonChat() {
       ...(!isFormData ? { "Content-Type": "application/json" } : {}),
     };
     const targetUrl = url.startsWith("http") ? url : `${API_BASE_URL}${url}`;
-    return fetch(targetUrl, { ...options, headers });
+    const res = await fetch(targetUrl, { ...options, headers });
+    if (res.status === 401) {
+      logout();
+      throw new Error("Unauthorized: Session invalid or expired.");
+    }
+    return res;
   }, [token]);
 
   const [activeMode, setActiveMode] = useState<"general" | "notes" | "tutor" | "quiz" | "pathfinder">("general");
@@ -331,6 +336,9 @@ export default function RuixenMoonChat() {
           body: JSON.stringify({ topic: userPrompt, num_questions: 5 }),
         });
         const data = await res.json();
+        if (!res.ok || data.status === "error") {
+          throw new Error(data.message || "Failed to generate quiz.");
+        }
         
         setMessages((prev: Message[]) => [
           ...prev,
@@ -353,6 +361,9 @@ export default function RuixenMoonChat() {
           body: JSON.stringify({ interests: userPrompt, level: "Intermediate", goal: `Master ${userPrompt}`, time: "Moderate" }),
         });
         const data = await res.json();
+        if (!res.ok || data.status === "error") {
+          throw new Error(data.message || "Failed to generate career roadmap.");
+        }
         
         setMessages((prev: Message[]) => [
           ...prev,
@@ -378,6 +389,9 @@ export default function RuixenMoonChat() {
           body: JSON.stringify(payload),
         });
         const data = await res.json();
+        if (!res.ok || data.status === "error") {
+          throw new Error(data.message || "Failed to get response from AI assistant.");
+        }
 
         setMessages((prev: Message[]) => [
           ...prev,
@@ -839,7 +853,7 @@ export default function RuixenMoonChat() {
                         </div>
                         <div
                           className="prose prose-invert prose-xs max-w-none text-neutral-300 leading-relaxed prose-headings:text-white prose-strong:text-[#FFEF4D] prose-code:bg-white/5 prose-code:p-0.5 prose-code:rounded prose-ul:list-disc prose-ol:list-decimal"
-                          dangerouslySetInnerHTML={{ __html: marked.parse(msg.text) }}
+                          dangerouslySetInnerHTML={{ __html: marked.parse(msg.text || "") }}
                         />
                       </div>
                     )}
@@ -913,9 +927,9 @@ export default function RuixenMoonChat() {
                           </span>
                         </div>
 
-                        {parseRoadmapSteps(msg.text).length > 0 ? (
+                        {parseRoadmapSteps(msg.text || "").length > 0 ? (
                           <div className="relative border-l border-white/10 ml-2 pl-5 space-y-5">
-                            {parseRoadmapSteps(msg.text).map((step, idx) => (
+                            {parseRoadmapSteps(msg.text || "").map((step, idx) => (
                               <div key={idx} className="relative">
                                 <span className="absolute -left-[25px] top-1 flex h-3 w-3 items-center justify-center rounded-full bg-[#0b0f19] border border-[#FFEF4D] text-[8px] font-black text-[#FFEF4D]">
                                   {idx + 1}
@@ -935,7 +949,7 @@ export default function RuixenMoonChat() {
                         ) : (
                           <div
                             className="prose prose-invert prose-sm max-w-none text-xs text-neutral-300"
-                            dangerouslySetInnerHTML={{ __html: marked.parse(msg.text) }}
+                            dangerouslySetInnerHTML={{ __html: marked.parse(msg.text || "") }}
                           />
                         )}
                       </div>
@@ -945,7 +959,7 @@ export default function RuixenMoonChat() {
                     {msg.type === "text" && (
                       <div
                         className="prose prose-invert max-w-none text-sm text-neutral-200 leading-relaxed"
-                        dangerouslySetInnerHTML={{ __html: marked.parse(msg.text) }}
+                        dangerouslySetInnerHTML={{ __html: marked.parse(msg.text || "") }}
                       />
                     )}
                   </div>
