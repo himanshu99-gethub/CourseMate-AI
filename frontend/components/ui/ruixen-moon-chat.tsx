@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { marked } from "marked";
+import AuthScreen from "./auth-screen";
 import {
   Compass,
   FileText,
@@ -25,6 +26,7 @@ import {
   Paperclip,
   Trophy,
   Plus,
+  LogOut,
 } from "lucide-react";
 
 interface AutoResizeProps {
@@ -113,6 +115,46 @@ const getWelcomeMessage = (mode: string) => {
 };
 
 export default function RuixenMoonChat() {
+  const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<any | null>(null);
+
+  // Check storage on mount
+  useEffect(() => {
+    const savedToken = localStorage.getItem("coursemate_token");
+    const savedUser = localStorage.getItem("coursemate_user");
+    if (savedToken && savedUser) {
+      setToken(savedToken);
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
+
+  const handleAuthSuccess = (newToken: string, newUser: any) => {
+    localStorage.setItem("coursemate_token", newToken);
+    localStorage.setItem("coursemate_user", JSON.stringify(newUser));
+    setToken(newToken);
+    setUser(newUser);
+  };
+
+  const logout = () => {
+    localStorage.removeItem("coursemate_token");
+    localStorage.removeItem("coursemate_user");
+    setToken(null);
+    setUser(null);
+  };
+
+  // Auth fetch wrapper (injects Bearer token dynamically)
+  const authFetch = useCallback(async (url: string, options: RequestInit = {}) => {
+    const headers = {
+      ...options.headers,
+      "Content-Type": options.body instanceof FormData ? undefined : "application/json",
+      ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+    };
+    if (options.body instanceof FormData) {
+      delete (headers as any)["Content-Type"];
+    }
+    return fetch(url, { ...options, headers });
+  }, [token]);
+
   const [activeMode, setActiveMode] = useState<"general" | "notes" | "tutor" | "quiz" | "pathfinder">("general");
   
   const [conversations, setConversations] = useState<Record<string, Message[]>>({
@@ -199,7 +241,7 @@ export default function RuixenMoonChat() {
 
   const fetchHistory = async () => {
     try {
-      const res = await fetch("/api/history");
+      const res = await authFetch("/api/history");
       const data = await res.json();
       if (data.history) {
         setHistoryItems(data.history);
@@ -211,7 +253,7 @@ export default function RuixenMoonChat() {
 
   const checkDocumentStatus = async () => {
     try {
-      const res = await fetch("/api/document-status");
+      const res = await authFetch("/api/document-status");
       const data = await res.json();
       if (data.has_document) {
         setHasDocument(true);
@@ -223,9 +265,11 @@ export default function RuixenMoonChat() {
   };
 
   useEffect(() => {
-    checkDocumentStatus();
-    fetchHistory();
-  }, []);
+    if (token) {
+      checkDocumentStatus();
+      fetchHistory();
+    }
+  }, [token, activeMode]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -256,7 +300,7 @@ export default function RuixenMoonChat() {
         formData.append("level", "Intermediate");
         formData.append("mode", "Deep Dive");
 
-        const res = await fetch("/api/generate-notes", { method: "POST", body: formData });
+        const res = await authFetch("/api/generate-notes", { method: "POST", body: formData });
         const data = await res.json();
         
         setMessages((prev: Message[]) => [
@@ -277,7 +321,7 @@ export default function RuixenMoonChat() {
 
       } else if (currentFlow === "quiz-generation" || (activeMode === "quiz" && messages.length <= 1)) {
         // If first prompt in Quiz Mode, generate the Quiz Grid component directly
-        const res = await fetch("/api/generate-quiz", {
+        const res = await authFetch("/api/generate-quiz", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ topic: userPrompt, num_questions: 5 }),
@@ -299,7 +343,7 @@ export default function RuixenMoonChat() {
 
       } else if (currentFlow === "pathfinder-generation" || (activeMode === "pathfinder" && messages.length <= 1)) {
         // If first prompt in Pathfinder Mode, build career steps timeline component directly
-        const res = await fetch("/api/recommend", {
+        const res = await authFetch("/api/recommend", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ interests: userPrompt, level: "Intermediate", goal: `Master ${userPrompt}`, time: "Moderate" }),
@@ -324,7 +368,7 @@ export default function RuixenMoonChat() {
         const url = useRAG ? "/api/rag-chat" : "/api/chat";
         const payload = useRAG ? { query: userPrompt } : { message: userPrompt, mode: activeMode };
 
-        const res = await fetch(url, {
+        const res = await authFetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
@@ -427,7 +471,7 @@ export default function RuixenMoonChat() {
 
   const clearAllHistory = async () => {
     try {
-      await fetch("/api/history", { method: "DELETE" });
+      await authFetch("/api/history", { method: "DELETE" });
       setHistoryItems([]);
       setConversations({
         general: [{ id: "w-g", type: "text", text: getWelcomeMessage("general"), isUser: false }],
@@ -452,12 +496,16 @@ export default function RuixenMoonChat() {
 
   const deleteHistoryLog = async (id: number) => {
     try {
-      await fetch(`/api/history/${id}`, { method: "DELETE" });
+      await authFetch(`/api/history/${id}`, { method: "DELETE" });
       setHistoryItems((prev) => prev.filter((item) => item.id !== id));
     } catch (e) {
       console.error("Failed to delete history item:", e);
     }
   };
+
+  if (!token) {
+    return <AuthScreen onAuthSuccess={handleAuthSuccess} />;
+  }
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-[#0a0f1d] text-white">
@@ -630,6 +678,25 @@ export default function RuixenMoonChat() {
             </div>
           )}
         </div>
+
+        {/* 👤 User Profile & Logout */}
+        {user && (
+          <div className="p-4 border-t border-white/10 flex items-center justify-between bg-[#0b0f19]/35">
+            <div className="flex flex-col overflow-hidden mr-2">
+              <span className="text-xs font-black text-white truncate">{user.name}</span>
+              <span className="text-[10px] text-neutral-400 truncate">{user.email}</span>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={logout}
+              className="h-8 w-8 text-neutral-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg cursor-pointer shrink-0 animate-in fade-in duration-200"
+              title="Logout Session"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
 
       </aside>
 
