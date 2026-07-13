@@ -1,11 +1,11 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
+from flask import Flask, request, jsonify, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import json
 from utils import ai_engine
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='frontend/out', static_url_path='')
 app.config['SECRET_KEY'] = 'coursemate_ai_secret_key_123'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -27,34 +27,15 @@ class History(db.Model):
 with app.app_context():
     db.create_all()
 
-# --- Routes ---
+# --- Serve Static Next.js Frontend ---
 
-@app.route('/')
-def index():
-    return redirect(url_for('dashboard'))
-
-@app.route('/dashboard')
-def dashboard():
-    # Fetch all activity from global history since authentication is removed
-    history = History.query.order_by(History.timestamp.desc()).all()
-    user = {"username": "Academic Admin", "history": history}
-    return render_template('dashboard.html', user=user)
-
-@app.route('/chat')
-def chat():
-    return render_template('chat.html')
-
-@app.route('/notes')
-def notes():
-    return render_template('notes.html')
-
-@app.route('/quiz')
-def quiz():
-    return render_template('quiz.html')
-
-@app.route('/recommendations')
-def recommendations():
-    return render_template('recommendations.html')
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, 'index.html')
 
 # --- API Endpoints ---
 

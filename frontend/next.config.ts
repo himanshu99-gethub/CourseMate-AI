@@ -1,14 +1,23 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  async rewrites() {
-    return [
-      {
-        source: "/api/:path*",
-        destination: "http://localhost:5000/api/:path*",
+const isProd = process.env.NODE_ENV === "production";
+
+const nextConfig: NextConfig = isProd
+  ? {
+      output: "export",
+      images: {
+        unoptimized: true, // required for static export
       },
-    ];
-  },
-};
+    }
+  : {
+      async rewrites() {
+        return [
+          {
+            source: "/api/:path*",
+            destination: "http://localhost:5000/api/:path*",
+          },
+        ];
+      },
+    };
 
 export default nextConfig;
