@@ -507,11 +507,21 @@ export default function RuixenMoonChat() {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-[#0a0f1d] text-white">
+      {/* Mobile backdrop overlay — tap to close sidebar */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-20 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* 📁 Clean Sidebar with Modules & History */}
       <aside
         className={cn(
-          "flex flex-col border-r border-white/10 bg-[#0f172a] transition-all duration-300 relative z-20 h-full shadow-2xl",
-          isSidebarOpen ? "w-72" : "w-0 overflow-hidden border-r-0"
+          "flex flex-col border-r border-white/10 bg-[#0f172a] transition-all duration-300 h-full shadow-2xl",
+          isSidebarOpen
+            ? "fixed md:relative inset-y-0 left-0 w-72 z-30"
+            : "w-0 overflow-hidden border-r-0 relative z-20"
         )}
       >
         <div className="flex items-center justify-between p-5 border-b border-white/10">
@@ -714,7 +724,7 @@ export default function RuixenMoonChat() {
         />
 
         {/* Header Panel */}
-        <header className="relative w-full px-6 md:px-10 flex items-center justify-between p-4 z-10 border-b border-white/10 bg-[#0f172a]/40 backdrop-blur-md">
+        <header className="relative w-full px-3 md:px-6 lg:px-10 flex items-center justify-between py-3 px-3 md:p-4 z-10 border-b border-white/10 bg-[#0f172a]/40 backdrop-blur-md">
           <div className="flex items-center gap-3">
             {!isSidebarOpen && (
               <Button
@@ -726,50 +736,50 @@ export default function RuixenMoonChat() {
                 <PanelLeft className="h-4.5 w-4.5" />
               </Button>
             )}
-            <div className="flex items-center gap-2.5">
-              <Cpu className="h-5 w-5 text-[#FFEF4D] drop-shadow-[0_0_4px_rgba(255,239,77,0.45)]" />
+            <div className="flex items-center gap-2">
+              <Cpu className="h-4 w-4 md:h-5 md:w-5 text-[#FFEF4D] drop-shadow-[0_0_4px_rgba(255,239,77,0.45)]" />
               <span className="font-bold text-sm tracking-tight text-white">CourseMate AI</span>
-              <span className="text-[9px] bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-full text-[#FFEF4D] font-black uppercase tracking-wider">
+              <span className="hidden sm:inline text-[9px] bg-white/5 border border-white/10 px-2 py-0.5 rounded-full text-[#FFEF4D] font-black uppercase tracking-wider">
                 {activeMode === "general"
                   ? "Main Tutor"
                   : activeMode === "notes"
-                  ? "Notes Workspace"
+                  ? "Notes"
                   : activeMode === "tutor"
-                  ? "AI Tutor Room"
+                  ? "AI Tutor"
                   : activeMode === "quiz"
                   ? "Quiz Lab"
-                  : "Pathfinder Advisor"}
+                  : "Pathfinder"}
               </span>
             </div>
           </div>
 
           {/* Notes Context mode indicator */}
           {hasDocument && activeMode === "notes" && (
-            <div className="flex bg-[#0b0f19] border border-white/10 rounded-xl p-1 text-[11px] font-bold">
+            <div className="flex bg-[#0b0f19] border border-white/10 rounded-xl p-1 text-[10px] md:text-[11px] font-bold">
               <button
                 onClick={() => setChatMode("general")}
                 className={cn(
-                  "px-2.5 py-1 rounded-lg transition-colors",
+                  "px-2 md:px-2.5 py-1 rounded-lg transition-colors",
                   chatMode === "general" ? "bg-[#FFEF4D] text-[#030712]" : "text-neutral-400 hover:text-white"
                 )}
               >
-                🤖 Tutor
+                🤖 <span className="hidden sm:inline">Tutor</span>
               </button>
               <button
                 onClick={() => setChatMode("notes")}
                 className={cn(
-                  "px-2.5 py-1 rounded-lg transition-colors",
+                  "px-2 md:px-2.5 py-1 rounded-lg transition-colors",
                   chatMode === "notes" ? "bg-[#FFEF4D] text-[#030712]" : "text-neutral-400 hover:text-white"
                 )}
               >
-                📄 Notes: {documentTopic}
+                📄 <span className="hidden sm:inline">{documentTopic}</span>
               </button>
             </div>
           )}
         </header>
 
         {/* Scrollable Conversation Workspace (Scroll hidden) */}
-        <div className="flex-1 w-full max-w-3xl overflow-y-auto px-4 py-8 space-y-8 z-10 no-scrollbar">
+        <div className="flex-1 w-full max-w-3xl overflow-y-auto px-3 md:px-4 py-4 md:py-8 space-y-5 md:space-y-8 z-10 no-scrollbar">
           {messages.map((msg) => (
             <div
               key={msg.id}
@@ -780,7 +790,7 @@ export default function RuixenMoonChat() {
             >
               {/* Clean User Message */}
               {msg.isUser && (
-                <div className="group relative max-w-[75%] flex items-center gap-2">
+                <div className="group relative max-w-[88%] md:max-w-[75%] flex items-center gap-2">
                   <button
                     onClick={() => deleteMessage(msg.id)}
                     className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 text-neutral-500 hover:text-rose-400 shrink-0"
@@ -796,7 +806,7 @@ export default function RuixenMoonChat() {
 
               {/* Clean AI Widgets */}
               {!msg.isUser && (
-                <div className="group relative w-full max-w-[90%] flex gap-4 items-start">
+                <div className="group relative w-full max-w-[96%] md:max-w-[90%] flex gap-2 md:gap-4 items-start">
                   {/* AI Avatar badge */}
                   <div className="h-8 w-8 rounded-lg bg-[#FFEF4D]/10 border border-[#FFEF4D]/20 flex items-center justify-center shrink-0 mt-0.5 shadow-[0_0_8px_rgba(255,239,77,0.05)]">
                     <Sparkles className="h-4 w-4 text-[#FFEF4D]" />
@@ -961,7 +971,7 @@ export default function RuixenMoonChat() {
         </div>
 
         {/* Input Console */}
-        <div className="relative w-full max-w-2xl mb-8 px-4 z-10">
+        <div className="relative w-full max-w-2xl mb-3 md:mb-8 px-2 md:px-4 z-10">
           {/* Active Flow HUD Bar */}
           {currentFlow !== "general" && (
             <div className="flex items-center justify-between bg-[#FFEF4D]/5 border border-[#FFEF4D]/10 px-4 py-2 rounded-t-xl text-[10px] font-bold text-[#FFEF4D] mb-[-1px] animate-in slide-in-from-bottom-2">
