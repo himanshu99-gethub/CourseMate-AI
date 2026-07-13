@@ -28,7 +28,6 @@
     </div>
 
     <div class="chat-input-wrapper">
-        <div class="spinner spinner-sm hidden chat-spinner-pos" id="chat-spinner"></div>
         <input type="text" id="chat-input" class="styled-input" placeholder="Query the academic engine..." autocomplete="off">
         <button id="send-btn" class="send-btn" title="Send message" aria-label="Send message">
             <i class="fas fa-paper-plane"></i>
@@ -42,7 +41,6 @@
     const chatInput = document.getElementById('chat-input');
     const sendBtn = document.getElementById('send-btn');
     const chatMessages = document.getElementById('chat-messages');
-    const spinner = document.getElementById('chat-spinner');
     
     // Toggle DOM elements
     const contextWrapper = document.getElementById('context-wrapper');
@@ -52,6 +50,7 @@
     
     let chatMode = 'general'; // 'general' or 'notes'
     let currentTopic = '';
+    let isLoading = false;
 
     function addMessage(text, isUser) {
         const msgDiv = document.createElement('div');
@@ -65,15 +64,39 @@
         
         chatMessages.appendChild(msgDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
+        return msgDiv;
+    }
+
+    function showTypingIndicator() {
+        const bubble = document.createElement('div');
+        bubble.className = 'typing-bubble';
+        bubble.id = 'typing-indicator';
+        bubble.innerHTML = `
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+        `;
+        chatMessages.appendChild(bubble);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+        const indicator = document.getElementById('typing-indicator');
+        if (indicator) indicator.remove();
     }
 
     async function handleSend() {
+        if (isLoading) return;
         const message = chatInput.value.trim();
         if (!message) return;
 
+        isLoading = true;
+        sendBtn.disabled = true;
+        sendBtn.style.opacity = '0.5';
+
         addMessage(message, true);
         chatInput.value = '';
-        spinner.classList.remove('hidden');
+        showTypingIndicator();
 
         const isNotes = chatMode === 'notes';
         const url = isNotes ? '/api/rag-chat' : '/api/chat';
@@ -86,11 +109,15 @@
                 body: JSON.stringify(payload)
             });
             const data = await response.json();
+            removeTypingIndicator();
             addMessage(data.response, false);
         } catch (error) {
+            removeTypingIndicator();
             addMessage("Sorry, the neural link was interrupted. Please re-engage.", false);
         } finally {
-            spinner.classList.add('hidden');
+            isLoading = false;
+            sendBtn.disabled = false;
+            sendBtn.style.opacity = '';
         }
     }
 
