@@ -520,7 +520,7 @@ export default function RuixenMoonChat() {
         className={cn(
           "flex flex-col border-r border-white/10 bg-[#0f172a] transition-all duration-300 h-full shadow-2xl",
           isSidebarOpen
-            ? "fixed md:relative inset-y-0 left-0 w-72 z-30"
+            ? "fixed md:relative inset-y-0 left-0 w-[280px] md:w-72 z-30"
             : "w-0 overflow-hidden border-r-0 relative z-20"
         )}
       >
@@ -541,8 +541,8 @@ export default function RuixenMoonChat() {
           </Button>
         </div>
 
-        {/* 🛠️ Sidebar Modules/Triggers */}
-        <div className="p-4 border-b border-white/5 space-y-1 bg-[#0b0f19]/35">
+        {/* 🛠️ Sidebar Modules/Triggers — hidden on mobile (bottom nav used instead) */}
+        <div className="hidden md:block p-4 border-b border-white/5 space-y-1 bg-[#0b0f19]/35">
           <Button
             onClick={clearChat}
             className="w-full flex items-center justify-center gap-2 bg-[#FFEF4D] text-[#030712] hover:bg-[#fff37a] text-xs h-9 rounded-xl font-extrabold active:scale-[0.98] cursor-pointer mb-3"
@@ -726,16 +726,18 @@ export default function RuixenMoonChat() {
         {/* Header Panel */}
         <header className="relative w-full px-3 md:px-6 lg:px-10 flex items-center justify-between py-3 px-3 md:p-4 z-10 border-b border-white/10 bg-[#0f172a]/40 backdrop-blur-md">
           <div className="flex items-center gap-3">
-            {!isSidebarOpen && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsSidebarOpen(true)}
-                className="h-9 w-9 text-neutral-400 hover:text-white hover:bg-white/5 rounded-lg"
-              >
-                <PanelLeft className="h-4.5 w-4.5" />
-              </Button>
-            )}
+            {/* Always show hamburger on mobile; only show on desktop when sidebar is closed */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className={cn(
+                "h-9 w-9 text-neutral-400 hover:text-white hover:bg-white/5 rounded-lg",
+                isSidebarOpen ? "hidden md:hidden" : ""
+              )}
+            >
+              <PanelLeft className="h-4.5 w-4.5" />
+            </Button>
             <div className="flex items-center gap-2">
               <Cpu className="h-4 w-4 md:h-5 md:w-5 text-[#FFEF4D] drop-shadow-[0_0_4px_rgba(255,239,77,0.45)]" />
               <span className="font-bold text-sm tracking-tight text-white">CourseMate AI</span>
@@ -778,8 +780,8 @@ export default function RuixenMoonChat() {
           )}
         </header>
 
-        {/* Scrollable Conversation Workspace (Scroll hidden) */}
-        <div className="flex-1 w-full max-w-3xl overflow-y-auto px-3 md:px-4 py-4 md:py-8 space-y-5 md:space-y-8 z-10 no-scrollbar">
+        {/* Scrollable Conversation Workspace */}
+        <div className="flex-1 w-full max-w-3xl overflow-y-auto px-3 md:px-4 py-4 md:py-8 pb-2 md:pb-4 space-y-5 md:space-y-8 z-10 no-scrollbar">
           {messages.map((msg) => (
             <div
               key={msg.id}
@@ -971,7 +973,7 @@ export default function RuixenMoonChat() {
         </div>
 
         {/* Input Console */}
-        <div className="relative w-full max-w-2xl mb-3 md:mb-8 px-2 md:px-4 z-10">
+        <div className="relative w-full max-w-2xl mb-20 md:mb-8 px-2 md:px-4 z-10">
           {/* Active Flow HUD Bar */}
           {currentFlow !== "general" && (
             <div className="flex items-center justify-between bg-[#FFEF4D]/5 border border-[#FFEF4D]/10 px-4 py-2 rounded-t-xl text-[10px] font-bold text-[#FFEF4D] mb-[-1px] animate-in slide-in-from-bottom-2">
@@ -1058,6 +1060,39 @@ export default function RuixenMoonChat() {
           </div>
         </div>
       </div>
+
+      {/* 📱 Mobile Bottom Navigation Bar — visible only on mobile */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0f172a]/95 backdrop-blur-md border-t border-white/10">
+        <div className="flex items-center justify-around px-1 py-2">
+          {([
+            { mode: "general", icon: <Cpu className="h-5 w-5" />, label: "Tutor" },
+            { mode: "notes", icon: <FileText className="h-5 w-5" />, label: "Notes" },
+            { mode: "tutor", icon: <Brain className="h-5 w-5" />, label: "AI Room" },
+            { mode: "quiz", icon: <Trophy className="h-5 w-5" />, label: "Quiz" },
+            { mode: "pathfinder", icon: <Compass className="h-5 w-5" />, label: "Paths" },
+          ] as const).map(({ mode, icon, label }) => (
+            <button
+              key={mode}
+              onClick={() => { setActiveMode(mode); setCurrentFlow("general"); }}
+              className={cn(
+                "flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-all min-w-[52px]",
+                activeMode === mode
+                  ? "text-[#FFEF4D]"
+                  : "text-neutral-500 hover:text-neutral-300"
+              )}
+            >
+              <span className={cn(activeMode === mode && "drop-shadow-[0_0_6px_rgba(255,239,77,0.6)]")}>  
+                {icon}
+              </span>
+              <span className="text-[9px] font-bold tracking-wide">{label}</span>
+              {activeMode === mode && (
+                <span className="h-0.5 w-4 rounded-full bg-[#FFEF4D] mt-0.5" />
+              )}
+            </button>
+          ))}
+        </div>
+      </nav>
+
     </div>
   );
 }
