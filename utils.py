@@ -143,10 +143,27 @@ class CourseMateAI:
     def get_ai_response(self, prompt, context=""):
         """
         Generic AI response generator. 
-        Multi-stage fallback: NVIDIA (NIM) -> Gemini -> Local Engine.
+        Multi-stage fallback: Gemini -> NVIDIA (NIM) -> Local Engine.
         """
         try:
-            # 1. ATTEMPT NVIDIA NIM (Llama 3.1 8B is highly available)
+            # 1. ATTEMPT GEMINI FIRST (primary, fast and reliable)
+            if gemini_client:
+                try:
+                    completion = gemini_client.chat.completions.create(
+                        model="gemini-2.0-flash",
+                        messages=[
+                            {"role": "system", "content": context if context else "You are CourseMate AI, a premium academic assistant. Provide high-density, structured academic info."},
+                            {"role": "user", "content": prompt}
+                        ],
+                        temperature=0.6,
+                        max_tokens=3000,
+                        timeout=90.0  # 90s — fits within 120s Gunicorn limit
+                    )
+                    return completion.choices[0].message.content
+                except Exception as e:
+                    print(f"Gemini Signal Lost: {e}")
+
+            # 2. FALLBACK TO NVIDIA NIM (Llama 3.1 — fail fast)
             if nvidia_client:
                 try:
                     completion = nvidia_client.chat.completions.create(
@@ -156,29 +173,12 @@ class CourseMateAI:
                             {"role": "user", "content": f"Context: {context}\n\nTask: {prompt}"}
                         ],
                         temperature=0.6,
-                        max_tokens=3000,
-                        timeout=60.0 # Increased for larger batches (15-20 questions)
+                        max_tokens=2000,
+                        timeout=25.0  # Fail fast — total stays under 120s
                     )
                     return completion.choices[0].message.content
                 except Exception as e:
                     print(f"NVIDIA Signal Lost (Timeout or Error): {e}")
-
-            # 2. FALLBACK TO GEMINI (via OpenAI-compatible endpoint)
-            if gemini_client:
-                try:
-                    completion = gemini_client.chat.completions.create(
-                        model="gemini-1.5-flash",
-                        messages=[
-                            {"role": "system", "content": context if context else "You are CourseMate AI, a premium academic assistant. Provide high-density, structured academic info."},
-                            {"role": "user", "content": prompt}
-                        ],
-                        temperature=0.6,
-                        max_tokens=3000,
-                        timeout=30.0
-                    )
-                    return completion.choices[0].message.content
-                except Exception as e:
-                    print(f"Gemini Signal Lost: {e}")
             
             # 3. LOCAL SIMULATED INTELLIGENCE (Prevent 500 Errors)
             if "notes" in context.lower():
@@ -188,6 +188,7 @@ class CourseMateAI:
 
         except Exception as e:
             return f"Critical Engine Exception: {str(e)}"
+
 
     def recommend_courses(self, user_interests):
         """
