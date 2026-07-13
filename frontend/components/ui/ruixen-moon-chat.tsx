@@ -450,6 +450,15 @@ export default function RuixenMoonChat() {
     setMessages((prev: Message[]) => prev.filter((msg) => msg.id !== id));
   };
 
+  const deleteHistoryLog = async (id: number) => {
+    try {
+      await fetch(`/api/history/${id}`, { method: "DELETE" });
+      setHistoryItems((prev) => prev.filter((item) => item.id !== id));
+    } catch (e) {
+      console.error("Failed to delete history item:", e);
+    }
+  };
+
   return (
     <div className="flex h-screen w-full overflow-hidden bg-[#0a0f1d] text-white">
       {/* 📁 Clean Sidebar with Modules & History */}
@@ -577,31 +586,42 @@ export default function RuixenMoonChat() {
           </span>
           {historyItems.length > 0 ? (
             historyItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => loadHistoryItem(item)}
-                className="w-full text-left p-3 rounded-xl border border-white/5 bg-[#131b2e]/40 hover:bg-[#1e293b] hover:border-white/10 transition-all flex items-start gap-3 group active:scale-[0.98] shadow-sm"
-              >
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/5 text-neutral-300 group-hover:text-[#FFEF4D] transition-colors shrink-0 mt-0.5">
-                  {item.type === "chat" ? (
-                    <MessageSquare className="h-3.5 w-3.5" />
-                  ) : item.type === "notes" ? (
-                    <FileText className="h-3.5 w-3.5" />
-                  ) : item.type === "quiz" ? (
-                    <Brain className="h-3.5 w-3.5" />
-                  ) : (
-                    <Compass className="h-3.5 w-3.5" />
-                  )}
-                </div>
-                <div className="overflow-hidden">
-                  <span className="inline-block text-[9px] uppercase font-bold tracking-wider text-[#FFEF4D]/70 mb-0.5">
-                    {item.type}
-                  </span>
-                  <p className="text-xs font-bold text-neutral-300 truncate group-hover:text-white transition-colors">
-                    {item.topic || "Interaction"}
-                  </p>
-                </div>
-              </button>
+              <div key={item.id} className="relative group/item w-full">
+                <button
+                  onClick={() => loadHistoryItem(item)}
+                  className="w-full text-left p-3 pr-9 rounded-xl border border-white/5 bg-[#131b2e]/40 hover:bg-[#1e293b] hover:border-white/10 transition-all flex items-start gap-3 group active:scale-[0.98] shadow-sm"
+                >
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/5 text-neutral-300 group-hover:text-[#FFEF4D] transition-colors shrink-0 mt-0.5">
+                    {item.type === "chat" ? (
+                      <MessageSquare className="h-3.5 w-3.5" />
+                    ) : item.type === "notes" ? (
+                      <FileText className="h-3.5 w-3.5" />
+                    ) : item.type === "quiz" ? (
+                      <Brain className="h-3.5 w-3.5" />
+                    ) : (
+                      <Compass className="h-3.5 w-3.5" />
+                    )}
+                  </div>
+                  <div className="overflow-hidden">
+                    <span className="inline-block text-[9px] uppercase font-bold tracking-wider text-[#FFEF4D]/70 mb-0.5">
+                      {item.type}
+                    </span>
+                    <p className="text-xs font-bold text-neutral-300 truncate group-hover:text-white transition-colors">
+                      {item.topic || "Interaction"}
+                    </p>
+                  </div>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteHistoryLog(item.id);
+                  }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover/item:opacity-100 transition-opacity p-1.5 text-neutral-500 hover:text-rose-400 z-30"
+                  title="Delete log entry"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
             ))
           ) : (
             <div className="flex flex-col items-center justify-center py-20 text-center text-neutral-600">

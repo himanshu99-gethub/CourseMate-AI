@@ -85,6 +85,20 @@ def api_history():
     return jsonify({'history': history_list})
 
 
+@app.route('/api/history/<int:item_id>', methods=['DELETE'])
+def delete_history_item(item_id):
+    try:
+        item = History.query.get(item_id)
+        if not item:
+            return jsonify({'status': 'error', 'message': 'Item not found'}), 404
+        db.session.delete(item)
+        db.session.commit()
+        return jsonify({'status': 'success', 'message': f'History item {item_id} deleted'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
 @app.route('/api/chat', methods=['POST'])
 def api_chat():
     data = request.json
